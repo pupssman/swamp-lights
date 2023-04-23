@@ -16,13 +16,13 @@ fn main() -> ! {
     let pins = arduino_hal::pins!(dp);
 
     // Create SPI interface.
-    // FIXME: what the hello do those pins ACTUALLY mean?
+    // We assign 4 well-known pins of SPI to our HW pins by numbers, see SPI docs
     let (spi, _) = spi::Spi::new(
         dp.SPI,
-        pins.d13.into_output(),
-        pins.d11.into_output(),
-        pins.d12.into_pull_up_input(),
-        pins.d10.into_output(),
+        pins.d13.into_output(),  // SCK pin -- clock
+        pins.d11.into_output(),  // MOSI -- master-out-slave-in
+        pins.d12.into_pull_up_input(),  // MISO --- master-in-slave-out -- that's whyt it's output!
+        pins.d10.into_output(),  // SS -- slave select pin
         spi::Settings {
             clock: spi::SerialClockRate::OscfOver8,
             ..Default::default()
