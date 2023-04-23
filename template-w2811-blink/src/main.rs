@@ -10,6 +10,8 @@ use ws2812_spi as ws2812;
 use crate::ws2812::prerendered::Ws2812;
 use smart_leds::{SmartLedsWrite, RGB8};
 
+const TOTAL_LEDS: usize= 20;
+
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
@@ -29,9 +31,17 @@ fn main() -> ! {
         },
     );
 
-    let mut output_buffer = [0; 20 + (3 * 12)];
-    let mut data: [RGB8; 3] = [RGB8::default(); 3];
-    let empty: [RGB8; 3] = [RGB8::default(); 3];
+    let mut output_buffer = [0; 20 + (TOTAL_LEDS * 12)];
+    let half_red: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0x77, b: 0}; TOTAL_LEDS];
+    let all_red: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0xFF, b: 0}; TOTAL_LEDS];
+    //let half_green: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0x77, b: 0}; TOTAL_LEDS];
+    //let all_green: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0xFF, b: 0}; TOTAL_LEDS];
+    let half_blue: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0, b: 0x77}; TOTAL_LEDS];
+    let all_blue: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0, b: 0xFF}; TOTAL_LEDS];
+    //let half_white: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0x77, g: 0x77, b: 0x77}; TOTAL_LEDS];
+    //let all_white: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0xFF, g: 0xFF, b: 0xFF}; TOTAL_LEDS];
+    let empty: [RGB8; TOTAL_LEDS] = [RGB8::default(); TOTAL_LEDS];
+
     let mut ws = Ws2812::new(spi, &mut output_buffer);
 
     // set up serial interface for text output
@@ -40,24 +50,14 @@ fn main() -> ! {
     loop {
         ufmt::uwriteln!(&mut serial, "loop\r").void_unwrap();
 
-        data[0] = RGB8 {
-            r: 0,
-            g: 0,
-            b: 0x10,
-        };
-        data[1] = RGB8 {
-            r: 0,
-            g: 0x10,
-            b: 0,
-        };
-        data[2] = RGB8 {
-            r: 0x10,
-            g: 0,
-            b: 0,
-        };
-        ws.write(data.iter().cloned()).unwrap();
-        arduino_hal::delay_ms(1000 as u16);
-        ws.write(empty.iter().cloned()).unwrap();
-        arduino_hal::delay_ms(1000 as u16);
+        for layout in [
+            half_red, all_red, empty, 
+        //    half_blue, all_blue, empty, 
+            half_blue, all_blue, empty,
+        //    empty, half_white, all_white, empty
+        ] {
+            ws.write(layout.iter().cloned()).unwrap();
+            arduino_hal::delay_ms(1000 as u16);
+        }
     }
 }
