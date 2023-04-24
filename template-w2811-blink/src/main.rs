@@ -33,16 +33,24 @@ fn main() -> ! {
     );
 
     let mut output_buffer = [0; 20 + (TOTAL_LEDS * 12)];
-    let half_red = SCL{r:0x77, g:0, b:0};
-    //let half_red: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0x77, b: 0}; TOTAL_LEDS];
-    let all_red: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0xFF, b: 0}; TOTAL_LEDS];
-    //let half_green: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0x77, b: 0}; TOTAL_LEDS];
-    //let all_green: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0xFF, b: 0}; TOTAL_LEDS];
-    let half_blue: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0, b: 0x77}; TOTAL_LEDS];
-    let all_blue: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0, b: 0xFF}; TOTAL_LEDS];
-    //let half_white: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0x77, g: 0x77, b: 0x77}; TOTAL_LEDS];
-    //let all_white: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0xFF, g: 0xFF, b: 0xFF}; TOTAL_LEDS];
-    let empty: [RGB8; TOTAL_LEDS] = [RGB8::default(); TOTAL_LEDS];
+
+    let pulse_one = [
+        SCL{r: 0x00, g: 0x00, b: 0x00},
+        SCL{r: 0x00, g: 0x01, b: 0x00},
+        SCL{r: 0x00, g: 0x02, b: 0x00},
+        SCL{r: 0x00, g: 0x03, b: 0x00},
+        SCL{r: 0x00, g: 0x04, b: 0x01},
+        SCL{r: 0x00, g: 0x08, b: 0x01},
+        SCL{r: 0x00, g: 0x16, b: 0x02},
+        SCL{r: 0x00, g: 0x20, b: 0x02},
+        SCL{r: 0x00, g: 0x16, b: 0x01},
+        SCL{r: 0x00, g: 0x08, b: 0x01},
+        SCL{r: 0x00, g: 0x04, b: 0x00},
+        SCL{r: 0x00, g: 0x03, b: 0x00},
+        SCL{r: 0x00, g: 0x02, b: 0x00},
+        SCL{r: 0x00, g: 0x01, b: 0x00},
+        SCL{r: 0x00, g: 0x00, b: 0x00},
+    ];
 
     let mut ws = Ws2812::new(spi, &mut output_buffer);
 
@@ -52,15 +60,9 @@ fn main() -> ! {
     loop {
         ufmt::uwriteln!(&mut serial, "loop\r").void_unwrap();
 
-        for layout in [
-            half_red
-            //, all_red, empty, 
-        //    half_blue, all_blue, empty, 
-            //half_blue, all_blue, empty,
-        //    empty, half_white, all_white, empty
-        ] {
+        for layout in pulse_one {
             ws.write(layout.into_iter()).unwrap();
-            arduino_hal::delay_ms(1000 as u16);
+            arduino_hal::delay_ms(100 as u16);
         }
     }
 }

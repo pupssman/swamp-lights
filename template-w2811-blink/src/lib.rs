@@ -4,7 +4,7 @@ use core::option::Option;
 use core::option::Option::None;
 use smart_leds::{RGB8};
 
-pub const TOTAL_LEDS: usize= 20;
+pub const TOTAL_LEDS: usize= 150;
 
 #[derive(Clone, Copy)]
 pub struct SingleColorLine {
