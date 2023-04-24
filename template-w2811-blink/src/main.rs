@@ -10,7 +10,8 @@ use ws2812_spi as ws2812;
 use crate::ws2812::prerendered::Ws2812;
 use smart_leds::{SmartLedsWrite, RGB8};
 
-const TOTAL_LEDS: usize= 20;
+use template_w2811_blink::{TOTAL_LEDS, SingleColorLine as SCL};
+
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -32,7 +33,8 @@ fn main() -> ! {
     );
 
     let mut output_buffer = [0; 20 + (TOTAL_LEDS * 12)];
-    let half_red: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0x77, b: 0}; TOTAL_LEDS];
+    let half_red = SCL{r:0x77, g:0, b:0};
+    //let half_red: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0x77, b: 0}; TOTAL_LEDS];
     let all_red: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0xFF, b: 0}; TOTAL_LEDS];
     //let half_green: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0x77, b: 0}; TOTAL_LEDS];
     //let all_green: [RGB8; TOTAL_LEDS] = [RGB8 {r: 0, g: 0xFF, b: 0}; TOTAL_LEDS];
@@ -51,12 +53,13 @@ fn main() -> ! {
         ufmt::uwriteln!(&mut serial, "loop\r").void_unwrap();
 
         for layout in [
-            half_red, all_red, empty, 
+            half_red
+            //, all_red, empty, 
         //    half_blue, all_blue, empty, 
-            half_blue, all_blue, empty,
+            //half_blue, all_blue, empty,
         //    empty, half_white, all_white, empty
         ] {
-            ws.write(layout.iter().cloned()).unwrap();
+            ws.write(layout.into_iter()).unwrap();
             arduino_hal::delay_ms(1000 as u16);
         }
     }
