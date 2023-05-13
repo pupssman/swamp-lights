@@ -8,9 +8,8 @@ use arduino_hal::spi;
 
 use ws2812_spi as ws2812;
 use crate::ws2812::Ws2812;
-use smart_leds::{SmartLedsWrite, RGB8};
 
-use template_w2811_blink::{TOTAL_LEDS, SingleColorLine as SCL};
+use template_w2811_blink::{pulse_once, GradientPulserBulb, GradientPulserChain, SingleGradientPulser};
 
 
 #[arduino_hal::entry]
@@ -32,35 +31,34 @@ fn main() -> ! {
         },
     );
 
-    let pulse_one = [
-        SCL{r: 0x00, g: 0x00, b: 0x00},
-        SCL{r: 0x00, g: 0x01, b: 0x00},
-        SCL{r: 0x00, g: 0x02, b: 0x00},
-        SCL{r: 0x00, g: 0x03, b: 0x00},
-        SCL{r: 0x00, g: 0x04, b: 0x01},
-        SCL{r: 0x00, g: 0x08, b: 0x01},
-        SCL{r: 0x00, g: 0x16, b: 0x02},
-        SCL{r: 0x00, g: 0x20, b: 0x02},
-        SCL{r: 0x00, g: 0x16, b: 0x01},
-        SCL{r: 0x00, g: 0x08, b: 0x01},
-        SCL{r: 0x00, g: 0x04, b: 0x00},
-        SCL{r: 0x00, g: 0x03, b: 0x00},
-        SCL{r: 0x00, g: 0x02, b: 0x00},
-        SCL{r: 0x00, g: 0x01, b: 0x00},
-        SCL{r: 0x00, g: 0x00, b: 0x00},
-    ];
-
     let mut ws = Ws2812::new(spi);
 
     // set up serial interface for text output
     let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
-
+    let no_bulb: Option<GradientPulserBulb> = None;
+    let mut bulbs = [no_bulb; 30];
+    
+    bulbs[0] = Some(GradientPulserBulb{
+            length: 10,
+            current: 0,
+            sgps: [
+                Some(SingleGradientPulser{
+                    start:smart_leds::RGB { r: 200, g: 50, b: 150 },
+                    end:smart_leds::RGB { r: 10, g: 10, b: 10 },
+                    period: 30,
+                    current: 0
+                }), None, None, None
+            ]
+        });
+    
+    let chain = GradientPulserChain { 
+        gpbs: bulbs,
+        delay_ms: 100
+    };
+    
     loop {
         ufmt::uwriteln!(&mut serial, "loop\r").void_unwrap();
-
-        for layout in pulse_one {
-            ws.write(layout.into_iter()).unwrap();
-            arduino_hal::delay_ms(100 as u16);
-        }
+        pulse_once(&chain, &mut ws);
+        arduino_hal::delay_ms(chain.delay_ms);
     }
 }

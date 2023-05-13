@@ -1,57 +1,88 @@
 #![no_std]
-use core::iter::{Iterator, IntoIterator};
+use core::iter::Iterator;
 use core::option::Option;
 use core::option::Option::None;
+use arduino_hal::Spi;
 use smart_leds::{RGB8};
 
-pub const TOTAL_LEDS: usize= 300;
+use ws2812_spi as ws2812;
+use crate::ws2812::Ws2812;
+use smart_leds::{SmartLedsWrite};
+
 
 #[derive(Clone, Copy)]
-pub struct SingleColorLine {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8
+pub struct SingleGradientPulser {
+    pub start: RGB8,
+    pub end: RGB8,
+    pub period: u8, // in clicks
+    pub current: u8
 }
 
-#[derive(Clone, Copy)]
-pub struct SingleColorLineIterator {
-    scl: SingleColorLine,
-    index: usize
-}
-
-impl IntoIterator for SingleColorLine {
-    type Item = RGB8;
-    type IntoIter = SingleColorLineIterator;
-    
-    fn into_iter(self) -> SingleColorLineIterator {
-        SingleColorLineIterator {
-            scl: self,
-            index: TOTAL_LEDS
+impl SingleGradientPulser {
+    fn pulse(&mut self, length: u8) -> SingleColorIterator {
+        if self.current >= self.period {
+            self.current = 0;
+        } else {
+            self.current += 1;
+        }
+        
+        SingleColorIterator {
+            color: RGB8 {
+                // FIXME: overflows!
+                r: (self.end.r - self.start.r) * (self.current / self.period) + self.start.r, 
+                g: (self.end.g - self.start.g) * (self.current / self.period) + self.start.g, 
+                b: (self.end.b - self.start.b) * (self.current / self.period) + self.start.b, 
+            },
+            index: length
         }
     }
 }
 
-impl Iterator for SingleColorLineIterator {
+struct SingleColorIterator {
+    color: RGB8,
+    index: u8
+}
+
+impl Iterator for SingleColorIterator {
     type Item = RGB8;
     fn next(&mut self) -> Option<Self::Item> {
         if self.index > 0 {
             self.index -= 1;
-            return Some(RGB8{
-                r: self.scl.r,
-                g: self.scl.g,
-                b: self.scl.b
-            })
+            return Some(self.color)
         } else {
             return None
-
         }    
     } 
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn iter_smoke() {
-        assert_eq!(2, 2)
+#[derive(Clone, Copy)]
+pub struct GradientPulserBulb {
+    pub length: u8,
+    pub current: u8,
+    pub sgps: [Option<SingleGradientPulser>; 4]  // at most 4 gradients, duh
+}
+
+#[derive(Clone, Copy)]
+pub struct GradientPulserChain {
+    pub gpbs: [Option<GradientPulserBulb>; 30],  // at most 30 bulbs, duh
+    pub delay_ms: u16
+}
+
+pub fn pulse_once(chain: &GradientPulserChain, ws: &mut Ws2812<Spi>) {
+    for maybe_bulb in chain.gpbs {
+        match maybe_bulb {
+            None => (),
+            Some(bulb) => {
+                let maybe_pulser = bulb.sgps[0];  // FIXME: should use different ones)
+                match maybe_pulser {
+                    Some(mut pulser) => {
+                        match ws.write(pulser.pulse(bulb.length)) {
+                            Ok(_) => (),
+                            Err(_) => {}
+                        }
+                    }, None => ()
+                }
+            }
+        }
     }
 }
