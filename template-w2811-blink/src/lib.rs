@@ -3,6 +3,8 @@ use core::iter::Iterator;
 use core::option::Option;
 use core::option::Option::None;
 use arduino_hal::Spi;
+use arduino_hal::Usart;
+use arduino_hal::prelude::*;
 use smart_leds::{RGB8};
 
 use ws2812_spi as ws2812;
@@ -29,9 +31,9 @@ impl SingleGradientPulser {
         SingleColorIterator {
             color: RGB8 {
                 // FIXME: overflows!
-                r: (self.end.r - self.start.r) * (self.current / self.period) + self.start.r, 
-                g: (self.end.g - self.start.g) * (self.current / self.period) + self.start.g, 
-                b: (self.end.b - self.start.b) * (self.current / self.period) + self.start.b, 
+                r: (self.end.r - self.start.r) * self.current / self.period + self.start.r, 
+                g: (self.end.g - self.start.g) * self.current / self.period + self.start.g, 
+                b: (self.end.b - self.start.b) * self.current / self.period + self.start.b, 
             },
             index: length
         }
@@ -64,7 +66,7 @@ pub struct GradientPulserBulb {
 
 #[derive(Clone, Copy)]
 pub struct GradientPulserChain {
-    pub gpbs: [Option<GradientPulserBulb>; 30],  // at most 30 bulbs, duh
+    pub gpbs: [Option<GradientPulserBulb>; 10],  // at most 10 bulbs, duh
     pub delay_ms: u16
 }
 

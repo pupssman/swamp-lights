@@ -35,26 +35,31 @@ fn main() -> ! {
 
     // set up serial interface for text output
     let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
+    ufmt::uwriteln!(&mut serial, "prepare\r").void_unwrap();
+
     let no_bulb: Option<GradientPulserBulb> = None;
-    let mut bulbs = [no_bulb; 30];
+    let mut bulbs = [no_bulb; 10];
+    ufmt::uwriteln!(&mut serial, "prepare 2\r").void_unwrap();
     
     bulbs[0] = Some(GradientPulserBulb{
             length: 10,
             current: 0,
             sgps: [
                 Some(SingleGradientPulser{
-                    start:smart_leds::RGB { r: 200, g: 50, b: 150 },
-                    end:smart_leds::RGB { r: 10, g: 10, b: 10 },
+                    start:smart_leds::RGB { r: 255, g: 255, b: 255 },
+                    end:smart_leds::RGB { r: 255, g: 255, b: 255 },
                     period: 30,
                     current: 0
                 }), None, None, None
             ]
         });
+    ufmt::uwriteln!(&mut serial, "prepare 3\r").void_unwrap();
     
     let chain = GradientPulserChain { 
         gpbs: bulbs,
         delay_ms: 100
     };
+    ufmt::uwriteln!(&mut serial, "done\r").void_unwrap();
     
     loop {
         ufmt::uwriteln!(&mut serial, "loop\r").void_unwrap();
