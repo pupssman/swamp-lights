@@ -10,7 +10,7 @@ use ws2812_spi as ws2812;
 use crate::ws2812::Ws2812;
 use smart_leds::{SmartLedsWrite, RGB8};
 
-use template_w2811_blink::{TOTAL_LEDS, SingleColorLine as SCL};
+use template_w2811_blink::{TOTAL_LEDS, WsTicker, SingleColorLine as SCL};
 
 
 #[arduino_hal::entry]
@@ -54,6 +54,8 @@ fn main() -> ! {
 
     // set up serial interface for text output
     let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
+
+    let ticker = WsTicker{ws: &ws, period_ms: 100};
 
     loop {
         ufmt::uwriteln!(&mut serial, "loop\r").void_unwrap();
