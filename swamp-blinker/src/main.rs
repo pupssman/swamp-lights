@@ -10,7 +10,7 @@ use ws2812_spi as ws2812;
 use crate::ws2812::Ws2812;
 
 use blinker_utils::*;  // sister-crate, go with all-imports
-use template_w2811_blink::pulse_once;
+use swamp_blinker::pulse_once;
 
 #[arduino_hal::entry]
 fn main() -> ! {

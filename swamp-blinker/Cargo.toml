@@ -1,12 +1,12 @@
 [package]
-name = "template-w2811-blink"
+name = "swamp-blinker"
 version = "0.1.0"
 authors = ["Ivan Kalinin <pupssman@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [[bin]]
-name = "template-w2811-blink"
+name = "swamp-blinker"
 test = false
 bench = false
 
