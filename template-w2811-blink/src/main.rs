@@ -9,8 +9,8 @@ use arduino_hal::spi;
 use ws2812_spi as ws2812;
 use crate::ws2812::Ws2812;
 
-use template_w2811_blink::{pulse_once, GradientPulserBulb, GradientPulserChain, SingleGradientPulser};
-
+use blinker_utils::*;  // sister-crate, go with all-imports
+use template_w2811_blink::pulse_once;
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -46,8 +46,8 @@ fn main() -> ! {
             current: 0,
             sgps: [
                 Some(SingleGradientPulser{
-                    start:smart_leds::RGB { r: 255, g: 255, b: 255 },
-                    end:smart_leds::RGB { r: 255, g: 255, b: 255 },
+                    start:smart_leds::RGB { r: 255, g: 0, b: 0},
+                    end:smart_leds::RGB { r: 0, g: 0, b: 0},
                     period: 30,
                     current: 0
                 }), None, None, None

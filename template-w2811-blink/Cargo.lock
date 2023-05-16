@@ -71,6 +71,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fe8f5a8a398345e52358e18ff07cc17a568fbca5c6f73873d3a62056309603"
 
 [[package]]
+name = "blinker-utils"
+version = "0.1.0"
+dependencies = [
+ "smart-leds",
+]
+
+[[package]]
 name = "bytemuck"
 version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -204,6 +211,7 @@ name = "template-w2811-blink"
 version = "0.1.0"
 dependencies = [
  "arduino-hal",
+ "blinker-utils",
  "embedded-hal",
  "nb 0.1.3",
  "panic-halt",
