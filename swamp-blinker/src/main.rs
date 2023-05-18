@@ -10,7 +10,7 @@ use ws2812_spi as ws2812;
 use crate::ws2812::Ws2812;
 
 use blinker_utils::*;  // sister-crate, go with all-imports
-use swamp_blinker::pulse_once;
+use swamp_blinker::WsWriter;
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -31,13 +31,12 @@ fn main() -> ! {
         },
     );
 
-    let mut ws = Ws2812::new(spi);
+    let mut ws = WsWriter{ ws: Ws2812::new(spi) };
 
     // set up serial interface for text output
     let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
 
-    let no_bulb: Option<GradientPulserBulb> = None;
-    let mut bulbs = [no_bulb; 10];
+    let mut bulbs = [None, None, None, None, None, None, None, None, None, None];
     
     bulbs[0] = Some(GradientPulserBulb{
             length: 10,
@@ -46,7 +45,7 @@ fn main() -> ! {
                 Some(SingleGradientPulser{
                     start:smart_leds::RGB { r: 100, g: 100, b: 0},
                     end:smart_leds::RGB { r: 0, g: 0, b: 0},
-                    period: 30,
+                    period: 5,
                     current: 0
                 }), None, None, None
             ]
@@ -60,7 +59,7 @@ fn main() -> ! {
     
     loop {
         ufmt::uwriteln!(&mut serial, "loop\r").void_unwrap();
-        pulse_once(&mut chain, &mut ws);
+        chain.pulse_once(&mut ws);
         arduino_hal::delay_ms(chain.delay_ms);
     }
 }

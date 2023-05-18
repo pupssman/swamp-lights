@@ -7,20 +7,16 @@ use smart_leds::{SmartLedsWrite};
 
 use blinker_utils::*;  // sister-crate, go with all-imports
 
-pub fn pulse_once(chain: &mut GradientPulserChain, ws: &mut Ws2812<Spi>) {
-    for maybe_bulb in &mut chain.gpbs {
-        match maybe_bulb {
-            None => (),
-            Some(ref mut bulb) => {
-                let maybe_pulser = &mut bulb.sgps[0];  // FIXME: should use different ones)
-                match maybe_pulser {
-                    Some(ref mut pulser) => {
-                        match ws.write(pulser.pulse(bulb.length)) {
-                            Ok(_) => (),
-                            Err(_) => {}
-                        }
-                    }, None => ()
-                }
+pub struct WsWriter {
+    pub ws: Ws2812<Spi>
+}
+
+impl RgbWritable for WsWriter {
+    fn write(&mut self, leds: SingleColorIterator) {
+        match self.ws.write(leds) {
+            Ok(_) => (),
+            Err(_) => {
+                // FIXME: log error or restart!
             }
         }
     }
