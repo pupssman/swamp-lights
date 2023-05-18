@@ -63,7 +63,7 @@ pub struct GradientPulserChain {
 }
 
 pub trait RgbWritable {
-    fn write(&mut self, leds: SingleColorIterator);
+    fn write(&mut self, leds: dyn Iterator<Item = RGB8>);
 }
 
 impl GradientPulserChain {
@@ -75,7 +75,8 @@ impl GradientPulserChain {
                     let maybe_pulser = &mut bulb.sgps[0];  // FIXME: should use different ones)
                     match maybe_pulser {
                         Some(ref mut pulser) => {
-                            consumer.write(pulser.pulse(bulb.length));
+                            let it = pulser.pulse(bulb.length);
+                            consumer.write(it.chain(it));
                         }, None => ()
                     }
                 }
@@ -132,6 +133,8 @@ mod tests {
 
     impl RgbWritable for RgbAccumulator {
         fn write(&mut self, leds: SingleColorIterator) {
+            self.leds.clear();
+            
             for led in leds {
                 self.leds.push(led);
             }
@@ -171,5 +174,38 @@ mod tests {
 
         assert_eq!(accumulator_2.leds[0], RGB8{r: 80, g: 80, b:0});
         assert_eq!(accumulator_2.leds[9], RGB8{r: 80, g: 80, b:0});
+    }
+
+    #[test]
+    fn test_two_bulbs() {
+        let mut bulbs = [None, None, None, None, None, None, None, None, None, None];
+    
+        // put in two bulbs
+        for i in 0..2 {
+            bulbs[i] = Some(GradientPulserBulb{
+                    length: 10,
+                    current: 0,
+                    sgps: [
+                        Some(SingleGradientPulser{
+                            start:smart_leds::RGB { r: 100, g: 100, b: 0},
+                            end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                            period: 5,
+                            current: 0
+                        }), None, None, None
+                    ]
+                });
+        }
+    
+        let mut chain = GradientPulserChain { 
+            gpbs: bulbs,
+            delay_ms: 100
+        };
+
+        let mut accumulator = RgbAccumulator {leds: vec![]};
+
+        chain.pulse_once(&mut accumulator);
+        chain.pulse_once(&mut accumulator);
+
+        assert_eq!(accumulator.leds.len(), 20);
     }
 }
