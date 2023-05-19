@@ -66,19 +66,27 @@ pub trait RgbWritable {
     fn write(&mut self, leds: impl Iterator<Item = RGB8>);
 }
 
+impl GradientPulserBulb {
+    pub fn pulse_once(&mut self) -> impl Iterator< Item = RGB8 > {
+        let maybe_pulser = &mut self.sgps[0];  // FIXME: should use different ones)
+        match maybe_pulser {
+            Some(ref mut pulser) => {
+                pulser.pulse(self.length)
+            }, None => {
+                // bulb is just black
+                SingleColorIterator{ color: RGB8{r:0, g:0, b:0}, index: self.length }
+            }
+        }
+    }
+}
+
 impl GradientPulserChain {
     pub fn pulse_once(&mut self, consumer: &mut impl RgbWritable) {
         for maybe_bulb in &mut self.gpbs {
             match maybe_bulb {
                 None => (),
                 Some(ref mut bulb) => {
-                    let maybe_pulser = &mut bulb.sgps[0];  // FIXME: should use different ones)
-                    match maybe_pulser {
-                        Some(ref mut pulser) => {
-                            let it = pulser.pulse(bulb.length);
-                            consumer.write(it);
-                        }, None => ()
-                    }
+                    consumer.write(bulb.pulse_once());
                 }
             }
         }
