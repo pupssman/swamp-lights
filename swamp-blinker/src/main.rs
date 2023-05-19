@@ -37,14 +37,15 @@ fn main() -> ! {
     let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
 
     let mut bulbs = [None, None, None, None, None, None, None, None, None, None];
-    
-    for i in 0..10 {
+
+    // put in two bulbs
+    for i in 0..2 {
         bulbs[i] = Some(GradientPulserBulb{
                 length: 10,
                 current: 0,
                 sgps: [
                     Some(SingleGradientPulser{
-                        start:smart_leds::RGB { r: 100, g: 100, b: 0},
+                        start:smart_leds::RGB { r: 0, g: 100, b: 0},
                         end:smart_leds::RGB { r: 0, g: 0, b: 0},
                         period: 5,
                         current: 0
@@ -52,10 +53,10 @@ fn main() -> ! {
                 ]
             });
     }
-    
+
     let mut chain = GradientPulserChain { 
         gpbs: bulbs,
-        delay_ms: 16
+        delay_ms: 100
     };
     ufmt::uwriteln!(&mut serial, "prep done\r").void_unwrap();
     

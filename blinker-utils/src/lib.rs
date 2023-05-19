@@ -82,14 +82,9 @@ impl GradientPulserBulb {
 
 impl GradientPulserChain {
     pub fn pulse_once(&mut self, consumer: &mut impl RgbWritable) {
-        for maybe_bulb in &mut self.gpbs {
-            match maybe_bulb {
-                None => (),
-                Some(ref mut bulb) => {
-                    consumer.write(bulb.pulse_once());
-                }
-            }
-        }
+        consumer.write(self.gpbs.iter_mut()
+            .flat_map(|b| b)  // filters out the nones
+            .flat_map(|b| b.pulse_once()));  // gets the pulses and merges their iterators into one
     }
 }
 
@@ -188,21 +183,31 @@ mod tests {
     fn test_two_bulbs() {
         let mut bulbs = [None, None, None, None, None, None, None, None, None, None];
     
-        // put in two bulbs
-        for i in 0..2 {
-            bulbs[i] = Some(GradientPulserBulb{
-                    length: 10,
-                    current: 0,
-                    sgps: [
-                        Some(SingleGradientPulser{
-                            start:smart_leds::RGB { r: 100, g: 100, b: 0},
-                            end:smart_leds::RGB { r: 0, g: 0, b: 0},
-                            period: 5,
-                            current: 0
-                        }), None, None, None
-                    ]
-                });
-        }
+        bulbs[0] = Some(GradientPulserBulb{
+                length: 10,
+                current: 0,
+                sgps: [
+                    Some(SingleGradientPulser{
+                        start:smart_leds::RGB { r: 100, g: 0, b: 0},
+                        end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                        period: 5,
+                        current: 0
+                    }), None, None, None
+                ]
+            });
+
+        bulbs[1] = Some(GradientPulserBulb{
+                length: 10,
+                current: 0,
+                sgps: [
+                    Some(SingleGradientPulser{
+                        start:smart_leds::RGB { r: 0, g: 100, b: 0},
+                        end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                        period: 5,
+                        current: 0
+                    }), None, None, None
+                ]
+            });
     
         let mut chain = GradientPulserChain { 
             gpbs: bulbs,
@@ -212,8 +217,15 @@ mod tests {
         let mut accumulator = RgbAccumulator {leds: vec![]};
 
         chain.pulse_once(&mut accumulator);
+
+        assert_eq!(accumulator.leds.len(), 20);
+        assert_eq!(accumulator.leds[0], RGB8{r: 100, g: 0, b:0});
+        assert_eq!(accumulator.leds[19], RGB8{r: 0, g: 100, b:0});
+
         chain.pulse_once(&mut accumulator);
 
         assert_eq!(accumulator.leds.len(), 20);
+        assert_eq!(accumulator.leds[0], RGB8{r: 80, g: 0, b:0});
+        assert_eq!(accumulator.leds[19], RGB8{r: 0, g: 80, b:0});
     }
 }
