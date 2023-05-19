@@ -63,11 +63,11 @@ pub struct GradientPulserChain {
 }
 
 pub trait RgbWritable {
-    fn write(&mut self, leds: dyn Iterator<Item = RGB8>);
+    fn write(&mut self, leds: impl Iterator<Item = RGB8>);
 }
 
 impl GradientPulserChain {
-    pub fn pulse_once(&mut self, consumer: &mut dyn RgbWritable) {
+    pub fn pulse_once(&mut self, consumer: &mut impl RgbWritable) {
         for maybe_bulb in &mut self.gpbs {
             match maybe_bulb {
                 None => (),
@@ -76,7 +76,7 @@ impl GradientPulserChain {
                     match maybe_pulser {
                         Some(ref mut pulser) => {
                             let it = pulser.pulse(bulb.length);
-                            consumer.write(it.chain(it));
+                            consumer.write(it);
                         }, None => ()
                     }
                 }
@@ -132,7 +132,7 @@ mod tests {
     }
 
     impl RgbWritable for RgbAccumulator {
-        fn write(&mut self, leds: SingleColorIterator) {
+        fn write(&mut self, leds: impl Iterator<Item = RGB8>) {
             self.leds.clear();
             
             for led in leds {
