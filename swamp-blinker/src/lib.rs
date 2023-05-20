@@ -51,15 +51,22 @@ pub fn put_console(console: Console) {
 
 
 pub struct WsWriter {
-   pub ws: Ws2812<Spi>
+    pub ws: Ws2812<Spi>,
+    pub buf: [RGB8;100]
 }
 
 impl RgbWritable for WsWriter {
+    // we need to pass everything into a buf first so it actually runs smoothly
     fn write(&mut self, leds: impl Iterator<Item = RGB8>) {
-        match self.ws.write(leds) {
+        for (i, l) in leds.enumerate() { 
+            //print!("({} {} {})", l.r, l.g, l.b); 
+            self.buf[i] = l
+        } 
+        // println!("//");
+        match self.ws.write(self.buf.into_iter()) {
             Ok(_) => (),
             Err(_) => {
-                // FIXME: log error or restart!
+                println!("write error");
             }
         }
     }
