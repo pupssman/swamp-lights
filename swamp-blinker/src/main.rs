@@ -3,14 +3,14 @@
 
 use panic_halt as _;
 
-use arduino_hal::prelude::*;
 use arduino_hal::spi;
+use avr_device::interrupt;
 
 use ws2812_spi as ws2812;
 use crate::ws2812::Ws2812;
 
 use blinker_utils::*;  // sister-crate, go with all-imports
-use swamp_blinker::WsWriter;
+use swamp_blinker::*;
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -30,11 +30,11 @@ fn main() -> ! {
             ..Default::default()
         },
     );
-
-    let mut ws = WsWriter{ ws: Ws2812::new(spi) };
-
     // set up serial interface for text output
-    let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
+    let serial = arduino_hal::default_serial!(dp, pins, 57600);
+    put_console(serial);
+
+    let mut ws = WsWriter{ ws: Ws2812::new(spi)};
 
     let mut bulbs = [None, None, None, None, None, None, None, None, None, None];
 
@@ -58,10 +58,11 @@ fn main() -> ! {
         gpbs: bulbs,
         delay_ms: 100
     };
-    ufmt::uwriteln!(&mut serial, "prep done\r").void_unwrap();
+
+    println!("prep done");
     
     loop {
-        ufmt::uwriteln!(&mut serial, "loop\r").void_unwrap();
+        println!("loop");
         chain.pulse_once(&mut ws);
         arduino_hal::delay_ms(chain.delay_ms);
     }

@@ -200,6 +200,7 @@ name = "swamp-blinker"
 version = "0.1.0"
 dependencies = [
  "arduino-hal",
+ "avr-device",
  "blinker-utils",
  "embedded-hal",
  "nb 0.1.3",
