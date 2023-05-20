@@ -35,44 +35,122 @@ fn main() -> ! {
     let serial = arduino_hal::default_serial!(dp, pins, 57600);
     put_console(serial);
 
-    let mut ws = WsWriter{ ws: Ws2812::new(spi), buf: [RGB8{r:0,g:0,b:0};100]};
+    let mut ws = WsWriter{ ws: Ws2812::new(spi), buf: [RGB8{r:0,g:0,b:0};200]};
 
     let mut bulbs = [None, None, None, None, None, None, None, None, None, None];
 
     bulbs[0] = Some(GradientPulserBulb{
-            length: 5,
+            length: 20,
             current: 0,
             sgps: [
                 Some(SingleGradientPulser{
                     start:smart_leds::RGB { r: 0, g: 100, b: 0},
                     end:smart_leds::RGB { r: 0, g: 0, b: 0},
-                    period: 5,
+                    period: 100,
                     current: 0
                 }), None, None, None
             ]
         });
 
     bulbs[1] = Some(GradientPulserBulb{
-            length: 5,
+            length: 20,
             current: 0,
             sgps: [
                 Some(SingleGradientPulser{
                     start:smart_leds::RGB { r: 100, g: 0, b: 0},
                     end:smart_leds::RGB { r: 0, g: 0, b: 0},
-                    period: 5,
+                    period: 100,
                     current: 0
                 }), None, None, None
             ]
         });
 
     bulbs[2] = Some(GradientPulserBulb{
-            length: 5,
+            length: 20,
             current: 0,
             sgps: [
                 Some(SingleGradientPulser{
                     start:smart_leds::RGB { r: 0, g: 0, b: 100},
                     end:smart_leds::RGB { r: 0, g: 0, b: 0},
-                    period: 5,
+                    period: 100,
+                    current: 0
+                }), None, None, None
+            ]
+        });
+
+    bulbs[3] = Some(GradientPulserBulb{
+            length: 20,
+            current: 0,
+            sgps: [
+                Some(SingleGradientPulser{
+                    start:smart_leds::RGB { r: 0, g: 100, b: 0},
+                    end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                    period: 100,
+                    current: 0
+                }), None, None, None
+            ]
+        });
+
+    bulbs[4] = Some(GradientPulserBulb{
+            length: 20,
+            current: 0,
+            sgps: [
+                Some(SingleGradientPulser{
+                    start:smart_leds::RGB { r: 100, g: 0, b: 0},
+                    end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                    period: 100,
+                    current: 0
+                }), None, None, None
+            ]
+        });
+
+    bulbs[5] = Some(GradientPulserBulb{
+            length: 20,
+            current: 0,
+            sgps: [
+                Some(SingleGradientPulser{
+                    start:smart_leds::RGB { r: 0, g: 0, b: 100},
+                    end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                    period: 100,
+                    current: 0
+                }), None, None, None
+            ]
+        });
+
+    bulbs[6] = Some(GradientPulserBulb{
+            length: 20,
+            current: 0,
+            sgps: [
+                Some(SingleGradientPulser{
+                    start:smart_leds::RGB { r: 0, g: 100, b: 0},
+                    end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                    period: 100,
+                    current: 0
+                }), None, None, None
+            ]
+        });
+
+    bulbs[7] = Some(GradientPulserBulb{
+            length: 20,
+            current: 0,
+            sgps: [
+                Some(SingleGradientPulser{
+                    start:smart_leds::RGB { r: 100, g: 0, b: 0},
+                    end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                    period: 100,
+                    current: 0
+                }), None, None, None
+            ]
+        });
+
+    bulbs[8] = Some(GradientPulserBulb{
+            length: 20,
+            current: 0,
+            sgps: [
+                Some(SingleGradientPulser{
+                    start:smart_leds::RGB { r: 0, g: 0, b: 100},
+                    end:smart_leds::RGB { r: 0, g: 0, b: 0},
+                    period: 100,
                     current: 0
                 }), None, None, None
             ]
@@ -80,7 +158,7 @@ fn main() -> ! {
 
     let mut chain = GradientPulserChain { 
         gpbs: bulbs,
-        delay_ms: 100
+        delay_ms: 16
     };
 
     println!("prep done");

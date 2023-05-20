@@ -52,7 +52,7 @@ pub fn put_console(console: Console) {
 
 pub struct WsWriter {
     pub ws: Ws2812<Spi>,
-    pub buf: [RGB8;100]
+    pub buf: [RGB8;200]
 }
 
 impl RgbWritable for WsWriter {
