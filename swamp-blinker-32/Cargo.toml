@@ -2,7 +2,7 @@
 name = "swamp-blinker-eps32"
 version = "0.30.0"
 authors = ["pupssman"]
-edition = "2023"
+edition = "2018"
 categories = ["embedded", "hardware-support"]
 keywords = ["embedded", "svc", "idf", "esp-idf", "esp32"]
 license = "MIT OR Apache-2.0"
