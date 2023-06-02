@@ -42,6 +42,7 @@ use smol;
 use embedded_hal::adc::OneShot;
 use embedded_hal::blocking::delay::DelayMs;
 use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::spi as EmSPI;
 
 use embedded_svc::eth;
 use embedded_svc::io;
@@ -73,6 +74,7 @@ use esp_idf_hal::i2c;
 use esp_idf_hal::peripheral;
 use esp_idf_hal::prelude::*;
 use esp_idf_hal::spi;
+use esp_idf_hal::spi::*;
 
 use esp_idf_sys;
 use esp_idf_sys::{esp, EspError};
@@ -90,6 +92,11 @@ use ssd1306;
 use ssd1306::mode::DisplayConfig;
 
 use epd_waveshare::{epd4in2::*, graphics::VarDisplay, prelude::*};
+
+use blinker_utils::*;  // sister-crate, go with all-imports
+use smart_leds::{SmartLedsWrite, RGB8};
+use ws2812_spi as ws2812;
+use crate::ws2812::Ws2812;
 
 #[allow(dead_code)]
 #[cfg(not(feature = "qemu"))]
@@ -190,6 +197,8 @@ fn main() -> Result<()> {
         pins.gpio19,
         pins.gpio5,
     )?;
+
+    test_ws2812_spi();
 
     #[cfg(feature = "waveshare_epd")]
     waveshare_epd_hello_world(
@@ -1069,6 +1078,58 @@ fn esp32s3_usb_otg_hello_world(
         .map_err(|e| anyhow::anyhow!("Display error: {:?}", e))?;
 
     led_draw(&mut display).map_err(|e| anyhow::anyhow!("Led draw error: {:?}", e))
+}
+
+fn test_ws2812_spi() -> Result<()> {
+
+
+    let peripherals = Peripherals::take().unwrap();
+    let spi = peripherals.spi2;
+
+    let sclk = peripherals.pins.gpio6;
+    let serial_in = peripherals.pins.gpio2; // SDI
+    let serial_out = peripherals.pins.gpio7; // SDO
+    let cs_1 = peripherals.pins.gpio10;
+    let cs_2 = peripherals.pins.gpio3;
+
+    println!("Starting SPI loopback test");
+
+    let driver = SpiDriver::new::<SPI2>(
+        spi,
+        sclk,
+        serial_out,
+        Some(serial_in),
+        &SpiDriverConfig::new(),
+    )?;
+
+    let config_1 = spi::config::Config::new().baudrate(26.MHz().into());
+    let mut device_1 = SpiDeviceDriver::new(&driver, Some(cs_1), &config_1)?;
+
+    Ok(())
+}
+
+
+pub struct WsWriter {
+    pub ws: Ws2812<SpiBusDriver<SPI2>>,
+    pub buf: [RGB8;200]
+}
+
+
+impl RgbWritable for WsWriter {
+    // we need to pass everything into a buf first so it actually runs smoothly
+    fn write(&mut self, leds: impl Iterator<Item = RGB8>) {
+        for (i, l) in leds.enumerate() { 
+            //print!("({} {} {})", l.r, l.g, l.b); 
+            self.buf[i] = l
+        } 
+        // println!("//");
+        match self.ws.write(self.buf.into_iter()) {
+            Ok(_) => (),
+            Err(_) => {
+                println!("write error");
+            }
+        }
+    }
 }
 
 #[allow(dead_code)]
