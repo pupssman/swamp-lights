@@ -1,5 +1,6 @@
 import requests
 import pytest
+import uuid
 
 
 @pytest.fixture
@@ -17,3 +18,21 @@ def test_foo():
 
 def test_api_smoke(hub):
     assert requests.get(f'{hub}/ping').status_code == 200
+
+
+def test_flow_smoke(hub):
+    did = uuid.uuid4()
+
+    hello = requests.get(f'{hub}/hello?did={did}')
+    assert hello.text == '999'  # role unknown
+
+    state = requests.get(f'{hub}/state?did={did}')
+    assert state.status_code == 200
+    assert state.text == '0'  # state initial
+
+    event = requests.post(f'{hub}/event?did={did}&eid=999')  # post debug
+    assert event.status_code == 200
+
+    state_2 = requests.get(f'{hub}/state?did={did}')
+    assert state_2.status_code == 200
+    assert state_2.text == '999'  # state debug
