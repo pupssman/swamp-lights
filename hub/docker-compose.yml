@@ -1,0 +1,13 @@
+version: '3'
+services:
+  hub:
+    build: .
+    container_name: hub-app
+    # Создание переменных окружения в контейнере
+    environment:
+      - PYTHONUNBUFFERED=True                   
+    restart: on-failure
+    volumes:
+      - ./data:/data
+    ports:
+      - "5000:5000"
