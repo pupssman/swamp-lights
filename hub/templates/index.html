@@ -1,0 +1,36 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}This is an example page{% endblock %}
+
+{% block metas %}
+{{super()}}
+<meta http-equiv="refresh" content="2"/>
+{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+
+</div>
+{% endblock %}
+
+{% block content %}
+  <h2>World has {{ world.node_roles | length }} roles </h2>
+
+  <table class="table table-striped table-dark">
+    <thead> <tr>
+      <th scope="col">#</th>
+      <th scope="col">DID</th>
+      <th scope="col">Role</th>
+      <th scope="col">State</th>
+    </tr></thead>
+    <tbody>
+  {% for did in world.node_roles %}
+      <tr>
+        <th scope="col">{{ loop.index }}</th>
+        <td>{{ did }}</td>
+        <td>{{ world.node_roles[did] }}</td>
+        <td>{{ world.node_states[did] }}</td>
+      </tr>
+  {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

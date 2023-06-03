@@ -1,7 +1,9 @@
 from enum import Enum
-from flask import Flask, request
+from flask_bootstrap import Bootstrap
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
+Bootstrap(app)
 
 
 class State(Enum):
@@ -113,6 +115,12 @@ def state():
 @app.route('/ping')
 def ping():
     return 'pong'
+
+
+@app.route('/')
+def index():
+    "home page for ui control"
+    return render_template('index.html', world=world)
 
 
 if __name__ == '__main__':
