@@ -19,8 +19,11 @@ PWD = ''
 num_pixels = 300
 # strip control gpio
 strip_pin = 2
+button_pin = 5  # dp 5 to read button
 np = nx.NeoPixel(machine.Pin(strip_pin), num_pixels)
 led = machine.Pin(2, machine.Pin.OUT)
+# it should be locked on gnd,
+button = machine.Pin(button_pin, machine.Pin.IN, machine.Pin.PULL_UP)
 
 
 def light_full(color):
@@ -69,6 +72,12 @@ def get_state():
     return int(res.text)
 
 
+def report_event(eid):
+    res = urequests.post('http://%s:%s/event?did=%s&eid=%d' %
+                         (HOST, PORT, DID, eid))
+    print(res.text)
+
+
 class State:
     def __init__(self):
         self.loop = GREEN_LOOP
@@ -85,6 +94,16 @@ STATE = State()
 
 do_connect()
 register()
+
+
+def button_interrupt(pin_irq):
+    # FIXME: god knows whats in these args
+    print('button pressed: %s' % pin_irq)
+    report_event(999)  # debug event
+
+
+# 3 is like machine.Pin.IRQ_RISING but for both (rising / falling)
+button.irq(trigger=machine.Pin.IRQ_FALLING, handler=button_interrupt)
 
 
 def check_for_state(delay):
