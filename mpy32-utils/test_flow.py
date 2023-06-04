@@ -3,6 +3,7 @@ import time
 import neopixel as nx
 import urequests
 import ubinascii
+import _thread
 
 # unique id is 4 bytes, get nicer repr
 DID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')
@@ -17,7 +18,7 @@ PWD = ''
 # number of pixels
 num_pixels = 300
 # strip control gpio
-strip_pin = 5
+strip_pin = 2
 np = nx.NeoPixel(machine.Pin(strip_pin), num_pixels)
 led = machine.Pin(2, machine.Pin.OUT)
 
@@ -68,15 +69,38 @@ def get_state():
     return int(res.text)
 
 
+class State:
+    def __init__(self):
+        self.loop = GREEN_LOOP
+
+    def change_state(self, to_state):
+        # FIXME: change properly
+        if to_state == 999:
+            self.loop = RED_LOOP
+        else:
+            self.loop = GREEN_LOOP
+
+
+STATE = State()
+
 do_connect()
 register()
-loop = GREEN_LOOP
+
+
+def check_for_state(delay):
+    "threadfunc"
+    print('check for state thread started')
+
+    while True:
+        time.sleep(delay)  # check for state each second
+        try:
+            new_state_code = get_state()
+            STATE.change_state(new_state_code)
+        except Exception as e:
+            print('oops: %s' % e)
+
+
+_thread.start_new_thread(check_for_state, (1,))
 
 while True:
-    state = get_state()
-    if state == 999:  # debug
-        loop = RED_LOOP
-    else:
-        loop = GREEN_LOOP
-
-    play_loop(loop)
+    play_loop(STATE.loop)
