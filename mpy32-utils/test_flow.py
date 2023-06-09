@@ -33,13 +33,14 @@ def light_full(color):
     np.write()
 
 
+# FIXME: somehow colors are messed, names should be correct
 G = [(n * 4, 0, 0) for n in range(32)]
-B = [(0, n * 4, 0) for n in range(32)]
-R = [(0, 0, n * 4) for n in range(32)]
+R = [(0, n * 4, 0) for n in range(32)]
+B = [(0, 0, n * 4) for n in range(32)]
 K = [(0, 0, 0)] * 3
 
 RED_LOOP = K + R + R[::-1] + K
-
+BLUE_LOOP = K + B + B[::-1] + K
 GREEN_LOOP = K + G + G[::-1] + K
 
 
@@ -50,14 +51,27 @@ def play_loop(loop):
 
 
 def do_connect():
+    """
+    will try to connect for at most 30 secs
+    will raise Exceptionif not connected
+    """
     import network
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
         print('connecting to network...')
         wlan.connect(SSID, PWD)
-        while not wlan.isconnected():
-            pass
+
+        for _ in range(30):
+            # 30 seconds to connect
+            if not wlan.isconnected():
+                time.sleep(1)
+            else:
+                break  # from for loop
+        else:
+            # did not break
+            raise Exception('did not connect after 30 secs')
+
     print('network config:', wlan.ifconfig())
 
 
@@ -85,25 +99,22 @@ class State:
     def change_state(self, to_state):
         # FIXME: change properly
         if to_state == 999:
-            self.loop = RED_LOOP
+            self.loop = BLUE_LOOP
         else:
             self.loop = GREEN_LOOP
 
+    def on_internal_problem(self):
+        # FIXME: good only for dev
+        self.loop = RED_LOOP
+
 
 STATE = State()
-
-do_connect()
-register()
 
 
 def button_interrupt(pin_irq):
     # FIXME: god knows whats in these args
     print('button pressed: %s' % pin_irq)
     report_event(999)  # debug event
-
-
-# 3 is like machine.Pin.IRQ_RISING but for both (rising / falling)
-button.irq(trigger=machine.Pin.IRQ_FALLING, handler=button_interrupt)
 
 
 def check_for_state(delay):
@@ -119,7 +130,18 @@ def check_for_state(delay):
             print('oops: %s' % e)
 
 
-_thread.start_new_thread(check_for_state, (1,))
+if __name__ == '__main__':
+    # 3 is like machine.Pin.IRQ_RISING but for both (rising / falling)
+    button.irq(trigger=machine.Pin.IRQ_FALLING, handler=button_interrupt)
 
-while True:
-    play_loop(STATE.loop)
+    try:
+        do_connect()
+        register()
+    except Exception:
+        # failed to connect / register, play the dead loop
+        STATE.on_internal_problem()
+
+    _thread.start_new_thread(check_for_state, (1,))
+
+    while True:
+        play_loop(STATE.loop)
