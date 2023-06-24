@@ -97,13 +97,18 @@ def report_event(eid):
 class State:
     def __init__(self):
         self.loop = None
+        self._last_state = None
 
     def change_state(self, to_state):
+        """
+           :returns: if there was change, for debug purposes 
+        """
         # FIXME: change properly
-        if to_state == 999:
-            self.loop = None
-        else:
-            self.loop = None
+        if self._last_state == to_state:
+            return
+
+        self._last_state = to_state
+        return True
 
     def on_internal_problem(self):
         # FIXME: good only for dev
@@ -127,10 +132,12 @@ def check_for_state(delay):
         time.sleep(delay)  # check for state each second
         try:
             new_state_code = get_state()
-            STATE.change_state(new_state_code)
-            blink.fast(1)
+            if STATE.change_state(new_state_code):
+                blink.fast(2)
+            else:
+                blink.fast(1)
         except Exception as e:
-            blink.fast(3)
+            blink.fast(5)
             print('oops: %s' % e)
 
 
