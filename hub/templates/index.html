@@ -32,6 +32,7 @@
       <th scope="col">DID</th>
       <th scope="col">Role</th>
       <th scope="col">State</th>
+      <th scope="col">Since</th>
     </tr></thead>
     <tbody>
   {% for did in world.node_roles %}
@@ -40,6 +41,7 @@
         <td>{{ did }}</td>
         <td>{{ world.node_roles[did] }}</td>
         <td>{{ world.node_states[did] }}</td>
+        <td>{{ '%0.2f' | format(now - world.node_seen[did]) }}</td>
       </tr>
   {% endfor %}
     </tbody>

@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 from flask_bootstrap import Bootstrap5
 from flask import Flask, request, render_template, url_for, redirect
@@ -51,17 +52,20 @@ class World:
     def __init__(self):
         self.node_states = {}
         self.node_roles = {}
+        self.node_seen = {}
 
     def register(self, did):
         "returns role that this device got"
         role = DEFAULT_ROLES.get(did, Role.ROOM_UNKNOWN)
         self.node_roles[did] = role
         self.node_states[did] = State.INITIAL  # everything starts at initial
+        self.node_seen[did] = time.time()
 
         return self.node_roles[did]
 
     def read_state(self, did):
-        "return current state for did"
+        "return current state for did and note it's time"
+        self.node_seen[did] = time.time()
         return self.node_states.get(did, State.DEBUG)
 
     def handle_event(self, eid, did=None):
@@ -125,7 +129,7 @@ def ping():
 @app.route('/')
 def index():
     "home page for ui control"
-    return render_template('index.html', world=world)
+    return render_template('index.html', world=world, now=time.time())
 
 
 @app.route('/btn_action/<action>', methods=['POST'])

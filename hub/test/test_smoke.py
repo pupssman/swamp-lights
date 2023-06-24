@@ -21,7 +21,7 @@ def test_api_smoke(hub):
 
 
 def test_flow_smoke(hub):
-    did = uuid.uuid4()
+    did = str(uuid.uuid4())[:5]
 
     hello = requests.get(f'{hub}/hello?did={did}')
     assert hello.text == '999'  # role unknown
