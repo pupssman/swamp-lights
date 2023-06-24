@@ -1,3 +1,12 @@
+"""
+two blips -- starts connecting
+one blip -- while connting
+five blips -- faild to connect and/or register
+
+three blips -- exception on request
+one blip -- successful request
+"""
+
 import machine
 import time
 import urequests
@@ -12,9 +21,9 @@ wlan = network.WLAN(network.STA_IF)
 DID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')
 
 # FIXME: read those from drive?
-HOST = '192.168.0.2'
+HOST = '192.168.0.24'
 PORT = 5000
-SSID = ''
+SSID = 'wood_wonders'
 PWD = ''
 
 led = machine.Pin(2, machine.Pin.OUT)
@@ -25,18 +34,18 @@ class Blinker:
     def __init__(self, led):
         self.led = led
 
-    def _blink(self, sleep_ms, number_times):
+    def _blink(self, sleep_s, number_times):
         for _ in range(number_times):
             self.led.value(1)
-            time.sleep(sleep_ms)
+            time.sleep(sleep_s)
             self.led.value(0)
-            time.sleep(sleep_ms)
+            time.sleep(sleep_s)
 
     def fast(self, times=1):
-        self._blink(100, times)
+        self._blink(0.1, times)
 
     def slow(self, times=1):
-        self._blink(500, times)
+        self._blink(0.5, times)
 
 
 blink = Blinker(led)
@@ -129,6 +138,7 @@ if __name__ == '__main__':
     try:
         do_connect()
         register()
+        blink.slow(2)
     except Exception:
         # failed to connect / register, play the dead loop
         STATE.on_internal_problem()
