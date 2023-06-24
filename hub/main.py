@@ -1,9 +1,10 @@
 from enum import Enum
-from flask_bootstrap import Bootstrap
+from flask_bootstrap import Bootstrap5
 from flask import Flask, request, render_template
 
 app = Flask(__name__)
-Bootstrap(app)
+Bootstrap5(app)
+app.config['BOOTSTRAP_SERVE_LOCAL'] = True  # serve bootstrap res locally
 
 
 class State(Enum):
