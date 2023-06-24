@@ -1,9 +1,12 @@
 import machine
 import time
-import neopixel as nx
 import urequests
 import ubinascii
 import _thread
+import network
+
+# FIXME: write a connector!
+wlan = network.WLAN(network.STA_IF)
 
 # unique id is 4 bytes, get nicer repr
 DID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')
@@ -14,68 +17,29 @@ PORT = 5000
 SSID = ''
 PWD = ''
 
-# LED strip configuration
-# number of pixels
-num_pixels = 300
-# strip control gpio
-strip_pin = 2
-button_pin = 5  # dp 5 to read button
-np = nx.NeoPixel(machine.Pin(strip_pin), num_pixels)
 led = machine.Pin(2, machine.Pin.OUT)
 # it should be locked on gnd,
-button = machine.Pin(button_pin, machine.Pin.IN, machine.Pin.PULL_UP)
-
-# FIXME: somehow colors are messed, names should be correct
-G = [(n * 7, 0, 0) for n in range(32)]
-R = [(0, n * 7, 0) for n in range(32)]
-B = [(0, 0, n * 7) for n in range(32)]
-K = [(0, 0, 0)] * 3
-
-cmap = {'r': R, 'b': B, 'g': G, 'k': K[:1] * 32}  # color letter to list of 32
 
 
-# 3 colors cycled
-LOOP_A = [
-    'rgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgb',
-    'gbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbr',
-    'brgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrg',
-]
+class Blinker:
+    def __init__(self, led):
+        self.led = led
 
-# g or b then black
-LOOP_B = [
-    'rb' * 22,
-    'br' * 22,
-    'kk' * 22,
-]
+    def _blink(self, sleep_ms, number_times):
+        for _ in range(number_times):
+            self.led.value(1)
+            time.sleep(sleep_ms)
+            self.led.value(0)
+            time.sleep(sleep_ms)
 
+    def fast(self, times=1):
+        self._blink(100, times)
 
-def light_bulbs(bulbseq, intensity=31, bulb_size=7):
-    """
-    lights bulbs as given
-    bubseq: a string of r/g/b/k for bulb color
-    intensity: from 0 to 31, duh
-    """
-
-    podgon = 6
-    skipbulbs = 1
-
-    for n, c in enumerate(bulbseq):
-        start = podgon + n * bulb_size
-        if n > skipbulbs:
-            color = cmap[c][intensity]
-        else:
-            color = (0, 0, 0)  # fixme
-        for i in range(bulb_size):
-            if start + i >= num_pixels:
-                break
-            np[start + i] = color
-    np.write()
+    def slow(self, times=1):
+        self._blink(500, times)
 
 
-def play_loop(loop):
-    for c in loop:
-        light_bulbs(c)
-        time.sleep(3)
+blink = Blinker(led)
 
 
 def do_connect():
@@ -83,21 +47,22 @@ def do_connect():
     will try to connect for at most 30 secs
     will raise Exceptionif not connected
     """
-    import network
-    wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
         print('connecting to network...')
+        blink.fast(2)
         wlan.connect(SSID, PWD)
 
         for _ in range(5):
             # 30 seconds to connect
             if not wlan.isconnected():
                 time.sleep(1)
+                blink.fast(1)
             else:
                 break  # from for loop
         else:
             # did not break
+            blink.fast(5)
             raise Exception('did not connect after 30 secs')
 
     print('network config:', wlan.ifconfig())
@@ -122,18 +87,18 @@ def report_event(eid):
 
 class State:
     def __init__(self):
-        self.loop = LOOP_A
+        self.loop = None
 
     def change_state(self, to_state):
         # FIXME: change properly
         if to_state == 999:
-            self.loop = LOOP_B
+            self.loop = None
         else:
-            self.loop = LOOP_A
+            self.loop = None
 
     def on_internal_problem(self):
         # FIXME: good only for dev
-        self.loop = LOOP_B
+        self.loop = None
 
 
 STATE = State()
@@ -154,22 +119,22 @@ def check_for_state(delay):
         try:
             new_state_code = get_state()
             STATE.change_state(new_state_code)
+            blink.fast(1)
         except Exception as e:
+            blink.fast(3)
             print('oops: %s' % e)
 
 
 if __name__ == '__main__':
-    # 3 is like machine.Pin.IRQ_RISING but for both (rising / falling)
-    button.irq(trigger=machine.Pin.IRQ_FALLING, handler=button_interrupt)
-
     try:
         do_connect()
         register()
     except Exception:
         # failed to connect / register, play the dead loop
         STATE.on_internal_problem()
+        blink.slow(5)
 
     _thread.start_new_thread(check_for_state, (1,))
 
     while True:
-        play_loop(STATE.loop)
+        time.sleep(1)  # busyloop
