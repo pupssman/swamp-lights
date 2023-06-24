@@ -13,8 +13,19 @@
 {% endblock %}
 
 {% block content %}
+  <div class="bg-dark bg-gradient">
   <h2 class="text-light bg-dark">World has {{ world.node_roles | length }} roles </h2>
+  <div class="d-grid gap-2">
+    <form method="POST" role="form" class="form-horizontal" 
+      action="{{ url_for('btn_action', action='next') }}">
+      <input type="submit" class="btn btn-secondary" value="Next"/>
+    </form>
 
+    <form method="POST" role="form" class="form-horizontal"
+      action="{{ url_for('btn_action', action='abort') }}">
+      <input type="submit" class="btn btn-danger" value="Abort"/>
+    </form>
+  </div>
   <table class="table table-striped table-dark">
     <thead> <tr>
       <th scope="col">#</th>
@@ -33,4 +44,5 @@
   {% endfor %}
     </tbody>
   </table>
+  </div>
 {% endblock %}

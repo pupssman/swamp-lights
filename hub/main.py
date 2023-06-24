@@ -1,6 +1,6 @@
 from enum import Enum
 from flask_bootstrap import Bootstrap5
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, url_for, redirect
 
 app = Flask(__name__)
 Bootstrap5(app)
@@ -31,6 +31,7 @@ class Event(Enum):
     "all the events possible in the system"
     DEBUG = 999  # all to debug
     RESET = 0  # all to initial
+    OP_NEXT = 1  # operator clicks "next"
     # TODO: add more
 
 
@@ -74,6 +75,9 @@ class World:
         elif eid == Event.RESET:
             for node in self.node_states:
                 self.node_states[node] = State.INITIAL
+        elif eid == Event.OP_NEXT:  # FIXME: that's just debug now
+            for node in self.node_states:
+                self.node_states[node] = State.DEBUG
         else:
             raise ValueError('Unknown event')
 
@@ -122,6 +126,18 @@ def ping():
 def index():
     "home page for ui control"
     return render_template('index.html', world=world)
+
+
+@app.route('/btn_action/<action>', methods=['POST'])
+def btn_action(action):
+    "resets all to initial"
+    if action == "abort":
+        world.handle_event(Event.RESET)
+    elif action == "next":
+        world.handle_event(Event.OP_NEXT)
+    else:
+        return 'BAD', 500
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
