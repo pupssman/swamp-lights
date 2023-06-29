@@ -3,7 +3,7 @@ from enum import Enum
 from flask_bootstrap import Bootstrap5
 from flask import Flask, request, render_template, url_for, redirect
 
-from sound import soundcheck
+from sound import soundcheck, PLAYER
 
 app = Flask(__name__)
 Bootstrap5(app)
@@ -76,12 +76,15 @@ class World:
             :eid: -- enum for Event
         """
         if eid == Event.DEBUG:
+            PLAYER.set_room_track(1, 0)  # FIXME: here for debub only
             for node in self.node_states:
                 self.node_states[node] = State.DEBUG
         elif eid == Event.RESET:
+            PLAYER.set_room_track(4, 0)  # FIXME: here for debub only
             for node in self.node_states:
                 self.node_states[node] = State.INITIAL
         elif eid == Event.OP_NEXT:  # FIXME: that's just debug now
+            PLAYER.set_room_track(3, 0)  # FIXME: here for debub only
             for node in self.node_states:
                 self.node_states[node] = State.DEBUG
         else:
