@@ -9,14 +9,15 @@ import _thread
 DID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')
 
 # FIXME: read those from drive?
-HOST = '192.168.0.2'
+HOST = '192.168.0.24'
 PORT = 5000
-SSID = ''
-PWD = ''
+SSID = 'wood_wonders'
+PWD = 'askthechildren'
 
 # LED strip configuration
-# number of pixels
-num_pixels = 300
+# we have 18 bulbs with 7 pixels and 1, last, with 6 pixels
+# just disregard the 19th missing pixel, should do no harm
+num_pixels = 7 * 19
 # strip control gpio
 strip_pin = 2
 button_pin = 5  # dp 5 to read button
@@ -36,16 +37,16 @@ cmap = {'r': R, 'b': B, 'g': G, 'k': K[:1] * 32}  # color letter to list of 32
 
 # 3 colors cycled
 LOOP_A = [
-    'rgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgb',
-    'gbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbr',
-    'brgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrgbrg',
+    'rgb' * 6 + 'r',
+    'gbr' * 6 + 'g',
+    'brg' * 6 + 'b',
 ]
 
 # g or b then black
 LOOP_B = [
-    'rb' * 22,
-    'br' * 22,
-    'kk' * 22,
+    'rb' * 9 + 'r',
+    'br' * 9 + 'b',
+    'kk' * 9 + 'k',
 ]
 
 
@@ -56,12 +57,12 @@ def light_bulbs(bulbseq, intensity=31, bulb_size=7):
     intensity: from 0 to 31, duh
     """
 
-    podgon = 6
-    skipbulbs = 1
+    podgon = 0
+    skipbulbs = 0
 
     for n, c in enumerate(bulbseq):
         start = podgon + n * bulb_size
-        if n > skipbulbs:
+        if n >= skipbulbs:
             color = cmap[c][intensity]
         else:
             color = (0, 0, 0)  # fixme
@@ -75,7 +76,7 @@ def light_bulbs(bulbseq, intensity=31, bulb_size=7):
 def play_loop(loop):
     for c in loop:
         light_bulbs(c)
-        time.sleep(3)
+        time.sleep(0.5)
 
 
 def do_connect():

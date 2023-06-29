@@ -3,12 +3,15 @@ services:
   hub:
     build: .
     container_name: hub-app
-    # Создание переменных окружения в контейнере
     environment:
       - PYTHONUNBUFFERED=True                   
+      # FIXME: this ip arddress is a miracle)
+      - PULSE_SERVER=172.17.0.1
+      - PULSE_COOKIE=/run/pulse/cookie
     restart: on-failure
     volumes:
       - ./data:/data
+      - ~/.config/pulse/cookie:/run/pulse/cookie
     ports:
       - "5000:5000"
     stop_signal: SIGINT

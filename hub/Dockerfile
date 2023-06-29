@@ -1,5 +1,9 @@
-FROM python:3.9.16-alpine
+FROM python:3.9.16-slim
 WORKDIR /hub
+# binary deps
+RUN apt-get update; \
+	apt-get install -y --no-install-recommends libpulse0
+  
 # deps
 COPY requirements.txt /hub
 RUN pip3 install --upgrade pip

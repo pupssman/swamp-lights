@@ -3,6 +3,8 @@ from enum import Enum
 from flask_bootstrap import Bootstrap5
 from flask import Flask, request, render_template, url_for, redirect
 
+from sound import soundcheck
+
 app = Flask(__name__)
 Bootstrap5(app)
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True  # serve bootstrap res locally
@@ -145,4 +147,5 @@ def btn_action(action):
 
 
 if __name__ == '__main__':
+    soundcheck()
     app.run(host='0.0.0.0')
