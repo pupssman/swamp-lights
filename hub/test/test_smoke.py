@@ -1,6 +1,7 @@
 import requests
 import pytest
 import uuid
+import time
 
 
 @pytest.fixture
@@ -17,7 +18,18 @@ def test_foo():
 
 
 def test_api_smoke(hub):
-    assert requests.get(f'{hub}/ping').status_code == 200
+    '''
+    checks api up to 10 secs for it to become available
+    '''
+    for _ in range(10):
+        time.sleep(1)
+        try:
+            if requests.get(f'{hub}/ping').status_code == 200:
+                break
+        except:
+            pass
+    else:
+        assert False
 
 
 def test_flow_smoke(hub):

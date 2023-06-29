@@ -1,5 +1,4 @@
 Flask==2.3.2
 Bootstrap-Flask==2.2.0
-pydub==0.25.1
 SoundCard==0.4.2
 soundfile==0.12.1  

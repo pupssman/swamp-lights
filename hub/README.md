@@ -9,4 +9,7 @@ A central controlling point for:
 Howto
 -----
 
+0. ensure pulseaudio server is running in home os:
+  1. see https://stackoverflow.com/a/29893375 / https://ubuntuforums.org/showthread.php?t=2442411
+  2. test with `PULSE_SERVER=172.17.0.1 mplayer assets/room_00_0.mp3`
 1. run dev: `docker compose up --build`
