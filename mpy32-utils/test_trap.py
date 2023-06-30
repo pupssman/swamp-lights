@@ -57,19 +57,23 @@ def light_bulbs(bulbseq, intensity=31, bulb_size=7):
     intensity: from 0 to 31, duh
     """
 
-    podgon = 0
-    skipbulbs = 0
+    podgon = 0  # dead pixels at the start
+    # clone pixels -- these repeat previous, dont write them separately
+    skips = {7 * 2 - 1, 7 * 3 - 1, 7 * 10 - 1}
+    start = podgon  # start from deat pixels
+    backoff = 0
 
-    for n, c in enumerate(bulbseq):
-        start = podgon + n * bulb_size
-        if n >= skipbulbs:
-            color = cmap[c][intensity]
-        else:
-            color = (0, 0, 0)  # fixme
+    for c in bulbseq:
+        color = cmap[c][intensity]
         for i in range(bulb_size):
             if start + i >= num_pixels:
                 break
-            np[start + i] = color
+            if start + i in skips:
+                backoff += 1  # that duplicate bulb, just dont use it
+            else:
+                # print('writing to %d color %s' % (start + i - backoff, c))
+                np[start + i - backoff] = color
+        start += bulb_size  # here goes next bulb
     np.write()
 
 
