@@ -17,7 +17,8 @@ PWD = 'askthechildren'
 # LED strip configuration
 # we have 18 bulbs with 7 pixels and 1, last, with 6 pixels
 # just disregard the 19th missing pixel, should do no harm
-num_pixels = 7 * 19
+num_bulbs = 19
+num_pixels = 7 * num_bulbs
 # strip control gpio
 strip_pin = 2
 button_pin = 5  # dp 5 to read button
@@ -35,19 +36,64 @@ K = [(0, 0, 0)] * 3
 cmap = {'r': R, 'b': B, 'g': G, 'k': K[:1] * 32}  # color letter to list of 32
 
 
-# 3 colors cycled
-LOOP_A = [
-    'rgb' * 6 + 'r',
-    'gbr' * 6 + 'g',
-    'brg' * 6 + 'b',
-]
+def make_wave_loop(width=2, interval=3):
+    # starting from 1, duh :(
+    blocks = [
+        (3,),
+        (4, 10),
+        (5, 9),
+        (6, 8),
+        (7,),
+        (11, 17),
+        (12, 16),
+        (13, 15),
+        (14,)
+    ]
 
-# g or b then black
-LOOP_B = [
-    'rb' * 9 + 'r',
-    'br' * 9 + 'b',
-    'kk' * 9 + 'k',
-]
+    starts, ends = (0, 1), (17, 18)
+
+    # start with all red
+    background = ['r'] * num_bulbs
+
+    # starts and ends are blue
+    for i in starts:
+        background[i] = 'b'
+    for i in ends:
+        background[i] = 'b'
+
+    mask = []
+
+    # mask is the color seq of blocks
+    while len(mask) < len(blocks):
+        mask.append('b' * width)  # up of the wave -- blue -- you can pass
+        mask.append('r' * interval)  # down of the wave -- red -- you can not
+
+    mask = ''.join(mask)
+
+    result = []
+    for n in range(width + interval):  # max phases -- sum of widht + period
+        # n is the phase
+        result.append(list(background))
+
+        # push relevant color for matching block
+        for bis, c in zip(blocks, mask):
+            for bi in bis:
+                result[-1][bi - 1] = c
+
+        # rotate mask once to the right, propagate the wave
+        mask = mask[-1:] + mask[:-1]
+
+    return [''.join(loop) for loop in result]
+
+
+# before 3 min
+LOOP_EASY = make_wave_loop(width=2, interval=3)
+
+# after 3 min
+LOOP_HARD = make_wave_loop(width=1, interval=4)
+
+# just all red
+LOOP_IDLE = ['r' * num_bulbs]
 
 
 def light_bulbs(bulbseq, intensity=31, bulb_size=7):
@@ -75,12 +121,6 @@ def light_bulbs(bulbseq, intensity=31, bulb_size=7):
                 np[start + i - backoff] = color
         start += bulb_size  # here goes next bulb
     np.write()
-
-
-def play_loop(loop):
-    for c in loop:
-        light_bulbs(c)
-        time.sleep(0.5)
 
 
 def do_connect():
@@ -127,18 +167,30 @@ def report_event(eid):
 
 class State:
     def __init__(self):
-        self.loop = LOOP_A
+        self.loop = LOOP_EASY
+        self.speed = 1  # 1 for normal, less for faster, more for slower
 
     def change_state(self, to_state):
         # FIXME: change properly
         if to_state == 999:
-            self.loop = LOOP_B
+            self.loop = LOOP_HARD
         else:
-            self.loop = LOOP_A
+            self.loop = LOOP_EASY
 
     def on_internal_problem(self):
         # FIXME: good only for dev
-        self.loop = LOOP_B
+        self.loop = LOOP_EASY
+
+    def play_loop(self):
+        for c in self.loop:
+            light_bulbs(c)
+            time.sleep(5 * self.speed)
+
+            for n in range(5):
+                light_bulbs(c, intensity=20)
+                time.sleep(0.2 * self.speed)
+                light_bulbs(c, intensity=30)
+                time.sleep(0.2 * self.speed)
 
 
 STATE = State()
@@ -177,4 +229,4 @@ if __name__ == '__main__':
     _thread.start_new_thread(check_for_state, (1,))
 
     while True:
-        play_loop(STATE.loop)
+        STATE.play_loop()
