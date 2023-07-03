@@ -216,9 +216,6 @@ def check_for_state(delay):
 
 
 if __name__ == '__main__':
-    # 3 is like machine.Pin.IRQ_RISING but for both (rising / falling)
-    button.irq(trigger=machine.Pin.IRQ_FALLING, handler=button_interrupt)
-
     try:
         do_connect()
         register()
