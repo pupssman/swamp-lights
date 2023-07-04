@@ -21,7 +21,7 @@ wlan = network.WLAN(network.STA_IF)
 DID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')
 
 # FIXME: read those from drive?
-HOST = '192.168.0.24'
+HOST = '192.168.0.2'
 PORT = 5000
 SSID = 'wood_wonders'
 PWD = ''
