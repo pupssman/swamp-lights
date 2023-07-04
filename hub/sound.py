@@ -70,6 +70,8 @@ class Player():
                     self._pos += step
                     if self._pos > len(self.track):
                         self._pos -= len(self.track)
+                else:
+                    time.sleep(.1)  # nothing to play yet, wait for next queue read
             except Exception as e:
                 print('OUCH in player: %s' % e)
                 time.sleep(self._chunk)
