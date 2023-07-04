@@ -39,7 +39,7 @@ class Player():
         self._lock = threading.RLock()
         self._player = None  # the speaker's player
         self._pos = 0  # offset in track
-        self._chunk = .01  # seconds, for later tuning
+        self._chunk = .1  # seconds, for later tuning
 
         self.start()
 
