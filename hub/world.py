@@ -1,5 +1,5 @@
 """
-    World model and state machine 
+    World model and state machine
 """
 
 import time
@@ -8,6 +8,7 @@ from collections import namedtuple
 
 Room = namedtuple('Room', ['id', 'high_timeout'])
 Event = namedtuple('Event', ['name', 'manual'])
+
 
 class Rooms:
     ENTRY = Room(1, None)
@@ -21,7 +22,7 @@ class Event(Enum):
     "logical events -- not device events!"
     RESET = Event('reset', True)  # global reset
     ENTER_DREAM = Event('Enter dream', True)  # start of the dream
-    
+
     PLUG_WALL_A = Event('Plug into wall a', False)
     PLUG_WALL_B = Event('Plug into wall b', False)
 
@@ -73,10 +74,32 @@ class World:
         try:
             event = Event[event_name]
         except Exception as e:
-            print('NOT EVENT: %s' % event_name)
+            print('NOT EVENT: %s / %s' % (event_name, e))
             return
 
         if event == Event.RESET:
-            return 'ololo'
-
-        # TODO: handle more events)
+            return self.reset()
+        # can only enter dream if active is entry room
+        elif event == Event.ENTER_DREAM and self.active_room == Rooms.ENTRY:
+            return self.enter_dream()
+        # devices work in catacombs
+        elif event in {
+            Event.COLUMN_LOW,  Event.COLUMN_RISE,
+            Event.PLUG_WALL_A, Event.PLUG_WALL_B,
+            Event.UNPLUG_WALL_A, Event.UNPLUG_WALL_B
+                } and self.aactive_room == Rooms.CATACOMBS:
+            return self.handle_device(event)
+        elif event in {Event.START_WALKER, Event.WALKER_ENRAGE} \
+                and self.active_room == Rooms.WALKER:
+            return self.handle_walker(event)
+        elif event in {Event.START_SWAMP, Event.SWAMP_ENRAGE} \
+                and self.active_room == Rooms.SWAMP:
+            return self.handle_swamp(event)
+        elif event in {Event.ENTER_TREE, Event.TREE_ENRAGE} \
+                and self.active_room == Rooms.TREE:
+            return self.handle_tree(event)
+        elif event == Event.RETURN_FROM_DREAM \
+                and self.active_room == Rooms.TREE:
+            return self.return_from_dream()
+        else:
+            print('CANT HANDLE -- %s in %s' % (event, self.aactive_room))
