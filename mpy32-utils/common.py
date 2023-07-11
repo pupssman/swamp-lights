@@ -60,6 +60,7 @@ class Connector():
                     time.sleep(1)
                     self.blink.fast(1)
                 else:
+                    print('connected!')
                     break  # from for loop
             else:
                 # did not break
@@ -105,6 +106,7 @@ class Connector():
 
 
 class State:
+    # FIXME: implement
     def __init__(self):
         self.loop = None
         self._last_state = None
@@ -172,11 +174,33 @@ class ButtonTracker:
             self._on_low()
 
 
+class Relay:
+    """
+        Controller for basic arduino releay
+        Relay is switched on when pin value is 0
+        Relay is switched off when pin is set to 1
+    """
+
+    def __init__(self, pin, initial=True):
+        self.pin = machine.Pin(pin, machine.Pin.OUT, machine.Pin.PULL_DOWN)
+
+        if initial:
+            self.on()
+        else:
+            self.off()
+
+    def on(self):
+        self.pin.value(0)
+
+    def off(self):
+        self.pin.value(1)
+
+
 class Blinker:
     """
        blinks built-in led
     """
-    def __init__(self, led):
+    def __init__(self):
         led = machine.Pin(2, machine.Pin.OUT)
 
         self.led = led
@@ -193,10 +217,6 @@ class Blinker:
 
     def slow(self, times=1):
         self._blink(0.5, times)
-
-
-blink = Blinker()
-
 
 # STATE = State()
 
@@ -215,6 +235,7 @@ blink = Blinker()
 
 if __name__ == '__main__':
     print('Beginning debug for connection')
+    blink = Blinker()
 
     def on_state_callback(sid):
         print('Got new state %s' % sid)
