@@ -23,3 +23,8 @@ burn_trap:
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/trap.py main.py
 	ampy -p /dev/ttyUSB0 reset
+
+burn_lights:
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/lights.py main.py
+	ampy -p /dev/ttyUSB0 reset

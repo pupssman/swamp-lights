@@ -71,7 +71,9 @@ class Connector():
 
     def register(self):
         res = urequests.get('http://%s:%s/hello?did=%s' % (HOST, PORT, DID))
-        print(res.text)
+        role = res.text
+        self.role = role
+        print('received role %s' % self.role)
 
     def get_state(self):
         res = urequests.get('http://%s:%s/state?did=%s' % (HOST, PORT, DID))
