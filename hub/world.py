@@ -7,10 +7,10 @@ from enum import Enum
 from collections import namedtuple
 
 Room = namedtuple('Room', ['id', 'high_timeout'])
-Event = namedtuple('Event', ['name', 'manual'])
+Event = namedtuple('Event', ['name', 'manual', 'code'])
 
 
-class Rooms:
+class Room:
     ENTRY = Room(1, None)
     CATACOMBS = Room(2, None)
     WALKER = Room(3, 3 * 60)
@@ -18,28 +18,35 @@ class Rooms:
     TREE = Room(5, 5 * 60)
 
 
+class RoomState:
+    DEBUG = 999
+    INITIAL = 0
+    PRIMARY = 1
+    HIGH = 2
+
+
 class Event(Enum):
     "logical events -- not device events!"
-    RESET = Event('reset', True)  # global reset
-    ENTER_DREAM = Event('Enter dream', True)  # start of the dream
+    RESET = Event('reset', True, 0)  # global reset
+    ENTER_DREAM = Event('Enter dream', True, 1)  # start of the dream
 
-    PLUG_WALL_A = Event('Plug into wall a', False)
-    PLUG_WALL_B = Event('Plug into wall b', False)
+    PLUG_WALL_A = Event('Plug into wall a', False, 2)
+    PLUG_WALL_B = Event('Plug into wall b', False, 3)
 
-    UNPLUG_WALL_A = Event('unplug from wall a', False)
-    UNPLUG_WALL_B = Event('unplug from wall b', False)
+    UNPLUG_WALL_A = Event('unplug from wall a', False, 4)
+    UNPLUG_WALL_B = Event('unplug from wall b', False, 5)
 
-    COLUMN_RISE = Event('column has risen', False)
-    COLUMN_LOW = Event('column was lowered', False)
+    COLUMN_RISE = Event('column has risen', False, 6)
+    COLUMN_LOW = Event('column was lowered', False, 7)
 
-    START_WALKER = Event('activate walker', True)  # start of the walker interaction
-    WALKER_ENRAGE = Event('walker enrages', True)
-    START_SWAMP = Event('activate beast', True)
-    SWAMP_ENRAGE = Event('beast erages', True)
+    START_WALKER = Event('activate walker', True, 8)  # start of the walker interaction
+    WALKER_ENRAGE = Event('walker enrages', True, 9)
+    START_SWAMP = Event('activate beast', True, 10)
+    SWAMP_ENRAGE = Event('beast erages', True, 11)
 
-    ENTER_TREE = Event('Enter tree zone', True)  # party enters the tree zone starts interaction
-    TREE_ENRAGE = Event('Panic at the tree', True)
-    RETURN_FROM_DREAM = Event('Wake up from dream', True)  # party wakes up in the tent again
+    ENTER_TREE = Event('Enter tree zone', True, 12)  # party enters the tree zone starts interaction
+    TREE_ENRAGE = Event('Panic at the tree', True, 13)
+    RETURN_FROM_DREAM = Event('Wake up from dream', True, 14)  # party wakes up in the tent again
 
 
 class World:
@@ -52,7 +59,7 @@ class World:
         self.reset()
 
     def reset(self):
-        self.active_room = Rooms.ENTRY
+        self.active_room = Room.ENTRY
         self.room_events = [Event.ENTER_DREAM]
         self.change_time = time.time()
 
@@ -61,14 +68,26 @@ class World:
         self.wall_a_plugged = False
         self.wall_b_plugged = False
 
+        self.room_state = {
+            r: RoomState.INITIAL for r in Room
+        }
+
     def get_device_state(self, room):
-        pass
+        return self.room_state[room]
 
     def get_operator_events(self):
-        pass
+        return [e for e in self.room_events if e.manual] + [Event.RESET]
 
     def get_description(self):
-        pass
+        result = '''
+            Active: %s
+            Possbile events: %s
+            Column: %s
+            wall_a: %s
+            wall_b: %s
+        ''' % (self.active_room, self.room_events, self.column_up,
+               self.wall_a_plugged, self.wall_b_plugged)
+        return result
 
     def handle_event(self, event_name):
         try:
@@ -80,26 +99,46 @@ class World:
         if event == Event.RESET:
             return self.reset()
         # can only enter dream if active is entry room
-        elif event == Event.ENTER_DREAM and self.active_room == Rooms.ENTRY:
+        elif event == Event.ENTER_DREAM and self.active_room == Room.ENTRY:
             return self.enter_dream()
         # devices work in catacombs
         elif event in {
             Event.COLUMN_LOW,  Event.COLUMN_RISE,
             Event.PLUG_WALL_A, Event.PLUG_WALL_B,
             Event.UNPLUG_WALL_A, Event.UNPLUG_WALL_B
-                } and self.aactive_room == Rooms.CATACOMBS:
+                } and self.aactive_room == Room.CATACOMBS:
             return self.handle_device(event)
         elif event in {Event.START_WALKER, Event.WALKER_ENRAGE} \
-                and self.active_room == Rooms.WALKER:
+                and self.active_room == Room.WALKER:
             return self.handle_walker(event)
         elif event in {Event.START_SWAMP, Event.SWAMP_ENRAGE} \
-                and self.active_room == Rooms.SWAMP:
+                and self.active_room == Room.SWAMP:
             return self.handle_swamp(event)
         elif event in {Event.ENTER_TREE, Event.TREE_ENRAGE} \
-                and self.active_room == Rooms.TREE:
+                and self.active_room == Room.TREE:
             return self.handle_tree(event)
         elif event == Event.RETURN_FROM_DREAM \
-                and self.active_room == Rooms.TREE:
+                and self.active_room == Room.TREE:
             return self.return_from_dream()
         else:
             print('CANT HANDLE -- %s in %s' % (event, self.aactive_room))
+
+    def enter_dream(self):
+        # FIXME
+        pass
+
+    def handle_device_event(self, event):
+        # FIXME
+        pass
+
+    def handle_walker(self, event):
+        pass
+
+    def handle_swamp(self, event):
+        pass
+
+    def handle_tree(self, event):
+        pass
+
+    def return_from_dream(self):
+        pass
