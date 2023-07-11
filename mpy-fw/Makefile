@@ -12,7 +12,14 @@ flash_32:
 burn_panno:
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/panno.py main.py
+	ampy -p /dev/ttyUSB0 reset
 
 burn_range:
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/test_range.py main.py
+	ampy -p /dev/ttyUSB0 reset
+
+burn_trap:
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/trap.py main.py
+	ampy -p /dev/ttyUSB0 reset

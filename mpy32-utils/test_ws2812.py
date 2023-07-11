@@ -6,7 +6,7 @@ import neopixel as nx
 # number of pixels
 num_pixels = 300
 # strip control gpio
-strip_pin = 5
+strip_pin = 4
 
 np = nx.NeoPixel(machine.Pin(strip_pin), num_pixels)
 led = machine.Pin(2, machine.Pin.OUT)
