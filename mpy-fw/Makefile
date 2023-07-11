@@ -8,3 +8,11 @@ flash_8266:
 # this is to flash a esp32 fw
 flash_32:
 	esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 esp32-20230426-v1.20.0.bin
+
+burn_panno:
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/panno.py main.py
+
+burn_range:
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/test_range.py main.py
