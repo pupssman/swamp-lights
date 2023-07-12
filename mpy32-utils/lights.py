@@ -2,10 +2,14 @@ import time
 import machine
 import neopixel as nx
 
-from common import Connector, Blinker
+from common import Connector, Blinker, DID, DID_ENTRY
 
-# strip control gpio
-strip_pin = 4
+if DID == DID_ENTRY:
+    # FIXME: oh hell
+    strip_pin = 2
+else:
+    # strip control gpio
+    strip_pin = 4
 
 
 class Scene:
@@ -19,25 +23,27 @@ class Scene:
         self.loop = loop
 
 
+ENTRY_START = 25
+
 SCENE_DARKNESS = Scene(loop=[[((0, 0, 0), 150)]])  # just black
 SCENE_COZY = Scene(
     intro=[
-        [((2 * x, x, 0), 20)]
+        [((2 * x, x, 0), ENTRY_START)]
         for x in range(0, 100, 5)
     ],
     loop=[
-        [((200, 100, 0), 20)],
-        [((210, 100, 0), 20)],
-        [((220, 100, 0), 20)],
-        [((230, 100, 0), 20)],
-        [((240, 100, 0), 20)],
-        [((250, 100, 0), 20)],
-        [((240, 100, 0), 20)],
-        [((230, 100, 0), 20)],
-        [((220, 100, 0), 20)],
-        [((210, 100, 0), 20)],
+        [((200, 70, 0), ENTRY_START)],
+        [((210, 70, 0), ENTRY_START)],
+        [((220, 70, 0), ENTRY_START)],
+        [((230, 70, 0), ENTRY_START)],
+        [((240, 70, 0), ENTRY_START)],
+        [((250, 70, 0), ENTRY_START)],
+        [((240, 70, 0), ENTRY_START)],
+        [((230, 70, 0), ENTRY_START)],
+        [((220, 70, 0), ENTRY_START)],
+        [((210, 70, 0), ENTRY_START)],
     ], outro=[
-        [((x, x, 0), 20)]
+        [((x, x, 0), ENTRY_START)]
         for x in range(100, 0, -5)
     ],
 )  # in room 1 and 2
@@ -58,7 +64,7 @@ SCENE_TREE = Scene()  # in room 4
 class State:
     def __init__(self):
         self.state = -1
-        self.scene = SCENE_PSYCHO  # FIXME: just testing
+        self.scene = SCENE_DARKNESS  # FIXME: just testing
         self.to_scene = None
         self.period = 0.2
         self.max_pixels = 150  # max pixels

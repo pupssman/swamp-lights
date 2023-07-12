@@ -44,7 +44,7 @@ class Event(Enum):
 DEFAULT_ROLES = {
     '24d7eb15b9b0': Role.ROOM_TREE,
     'a0b76556b22c': Role.ROOM_WALKER,
-    '807d3ab7dae8': Role.ROOM_BEAST,
+    '807d3ab7dae8': Role.ROOM_ENTRY,
     '9c9c1fc9b20c': Role.DEVICE_COLUMN,
     # TODO: more
 }

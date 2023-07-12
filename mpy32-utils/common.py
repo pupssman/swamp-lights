@@ -18,6 +18,8 @@ import network
 # unique id is 4 bytes, get nicer repr
 DID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')
 
+DID_ENTRY = '807d3ab7dae8'
+
 # FIXME: write a connector!
 # FIXME: read those from drive?
 HOST = '192.168.0.2'
