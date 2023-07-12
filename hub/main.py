@@ -74,26 +74,6 @@ class Nodes:
         self.node_seen[did] = time.time()
         return self.node_states.get(did, State.DEBUG)
 
-    def handle_event(self, eid, did=None):
-        """
-            handle event based on when and why
-            :eid: -- enum for Event
-        """
-        if eid == Event.DEBUG:
-            PLAYER.set_room_track(1, 0)  # FIXME: here for debub only
-            for node in self.node_states:
-                self.node_states[node] = State.DEBUG
-        elif eid == Event.RESET:
-            PLAYER.set_room_track(4, 0)  # FIXME: here for debub only
-            for node in self.node_states:
-                self.node_states[node] = State.INITIAL
-        elif eid == Event.OP_NEXT:  # FIXME: that's just debug now
-            PLAYER.set_room_track(3, 0)  # FIXME: here for debub only
-            for node in self.node_states:
-                self.node_states[node] = State.DEBUG
-        else:
-            raise ValueError('Unknown event')
-
 
 nodes = Nodes()
 WORLD = World()

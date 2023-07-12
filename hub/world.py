@@ -6,6 +6,8 @@ import time
 from enum import Enum
 from collections import namedtuple
 
+from sound import PLAYER
+
 RoomC = namedtuple('Room', ['id', 'high_timeout'])
 EventC = namedtuple('Event', ['name', 'manual', 'code'])
 
@@ -85,6 +87,7 @@ class World:
             r: RoomState.INITIAL for r in Room
         }
         self.room_state[Room.ENTRY] = RoomState.PRIMARY  # in reset we wait for new party
+        PLAYER.set_room_track(1, 0)  # cosy sounds
 
     def get_device_state(self, room):
         return self.room_state[room]
@@ -148,7 +151,7 @@ class World:
         }
 
         self.room_state[Room.ENTRY] = RoomState.HIGH # light is in primary room
-        # FIXME: PLAY_MUSIC
+        PLAYER.set_room_track(1, 1)  # psycho sounds
 
     def return_from_dream(self):
         self.active_room = Room.ENTRY
@@ -158,7 +161,7 @@ class World:
         }
 
         self.room_state[Room.ENTRY] = RoomState.HIGH # light is in primary room
-        # FIXME: PLAY_MUSIC
+        PLAYER.set_room_track(1, 0)  # cosy sounds
 
     def handle_device_event(self, event):
         if event == Event.PLUG_WALL_A:
@@ -187,6 +190,11 @@ class World:
             # all plugged, elevate room state
             self.room_state[Room.ENTRY] = RoomState.EXTRA
             # TODO: play music
+            PLAYER.set_room_track(2, 1)  # cosy sounds
+        else:
+            self.room_state[Room.ENTRY] = RoomState.EXTRA
+            # TODO: play music
+            PLAYER.set_room_track(2, 0)  # cosy sounds
 
     def handle_walker(self, event):
         self.active_room = Room.WALKER
@@ -196,10 +204,11 @@ class World:
         }
 
         if event == Event.START_WALKER:
+            PLAYER.set_room_track(3, 0)  # initial sounds
             self.room_state[Room.WALKER] = RoomState.PRIMARY
         else:
+            PLAYER.set_room_track(3, 1)  # danger sounds
             self.room_state[Room.WALKER] = RoomState.HIGH
-        # FIXME: play music
 
     def handle_swamp(self, event):
         self.active_room = Room.SWAMP
@@ -209,10 +218,11 @@ class World:
         }
 
         if event == Event.START_SWAMP:
+            PLAYER.set_room_track(4, 0)  # initial sounds
             self.room_state[Room.SWAMP] = RoomState.PRIMARY
         else:
+            # no elevated music here -- just speedup
             self.room_state[Room.SWAMP] = RoomState.HIGH
-        # FIXME: play music
 
     def handle_tree(self, event):
         self.active_room = Room.TREE
@@ -222,7 +232,8 @@ class World:
         }
 
         if event == Event.ENTER_TREE:
+            PLAYER.set_room_track(5, 0)  # initial sounds
             self.room_state[self.active_room] = RoomState.PRIMARY
         else:
+            PLAYER.set_room_track(5, 1)  # initial sounds
             self.room_state[self.active_room] = RoomState.HIGH
-        # FIXME: play music
