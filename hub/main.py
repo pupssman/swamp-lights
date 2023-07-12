@@ -3,8 +3,8 @@ from enum import Enum
 from flask_bootstrap import Bootstrap5
 from flask import Flask, request, render_template, url_for, redirect
 
-from sound import soundcheck, PLAYER
-from world import World
+from sound import soundcheck
+from world import World, Room
 
 app = Flask(__name__)
 Bootstrap5(app)
@@ -29,6 +29,17 @@ class Role(Enum):
     ROOM_TREE = 4
     DEVICE_WALL = 5
     DEVICE_COLUMN = 6
+
+
+def room_by_role(role):
+    return {
+        Role.ROOM_ENTRY: Room.ENTRY,
+        Role.ROOM_LAB: Room.CATACOMBS,
+        Role.ROOM_WALKER: Room.WALKER,
+        Role.ROOM_BEAST: Room.SWAMP,
+        Role.DEVICE_COLUMN: Room.COLUMN,
+        Role.ROOM_TREE: Room.TREE
+    }.get(role)
 
 
 class Event(Enum):
@@ -72,7 +83,12 @@ class Nodes:
     def read_state(self, did):
         "return current state for did and note it's time"
         self.node_seen[did] = time.time()
-        return self.node_states.get(did, State.DEBUG)
+        room = room_by_role(self.node_roles[did])
+        if room:
+            return WORLD.get_device_state(room)
+        else:
+            # FIXME: legacy fallback
+            return self.node_states.get(did, State.DEBUG).value
 
 
 nodes = Nodes()
@@ -109,7 +125,7 @@ def state():
     did = request.args.get('did')
     if not did:
         return 'no did', 400
-    return str(nodes.read_state(did).value)
+    return str(nodes.read_state(did))
 
 
 @app.route('/ping')
