@@ -14,7 +14,8 @@
 
 {% block content %}
   <div class="bg-dark bg-gradient">
-  <h2 class="text-light bg-dark">World has {{ world.node_roles | length }} roles </h2>
+  <h2 class="text-light bg-dark">World has {{ nodes.node_roles | length }} roles </h2>
+  <h2 class="text-light bg-dark">Desc: {{desc}}</h2>
   <div class="d-grid gap-2">
     <form method="POST" role="form" class="form-horizontal" 
       action="{{ url_for('btn_action', action='next') }}">
@@ -35,13 +36,13 @@
       <th scope="col">Since</th>
     </tr></thead>
     <tbody>
-  {% for did in world.node_roles %}
+  {% for did in nodes.node_roles %}
       <tr>
         <th scope="col">{{ loop.index }}</th>
         <td>{{ did }}</td>
-        <td>{{ world.node_roles[did] }}</td>
-        <td>{{ world.node_states[did] }}</td>
-        <td>{{ '%0.2f' | format(now - world.node_seen[did]) }}</td>
+        <td>{{ nodes.node_roles[did] }}</td>
+        <td>{{ nodes.node_states[did] }}</td>
+        <td>{{ '%0.2f' | format(now - nodes.node_seen[did]) }}</td>
       </tr>
   {% endfor %}
     </tbody>

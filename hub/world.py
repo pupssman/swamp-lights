@@ -6,24 +6,25 @@ import time
 from enum import Enum
 from collections import namedtuple
 
-Room = namedtuple('Room', ['id', 'high_timeout'])
+RoomC = namedtuple('Room', ['id', 'high_timeout'])
 Event = namedtuple('Event', ['name', 'manual', 'code'])
 
 
-class Room:
-    ENTRY = Room(1, None)
-    CATACOMBS = Room(2, None)
-    WALKER = Room(3, 3 * 60)
-    SWAMP = Room(4, None)
-    TREE = Room(5, 5 * 60)
-    COLUMN = Room(6, None)
+class Room(Enum):
+    ENTRY = RoomC(1, None)
+    CATACOMBS = RoomC(2, None)
+    WALKER = RoomC(3, 3 * 60)
+    SWAMP = RoomC(4, None)
+    TREE = RoomC(5, 5 * 60)
+    COLUMN = RoomC(6, None)
 
 
 class RoomState:
     DEBUG = 999
-    INITIAL = 0
-    PRIMARY = 1
-    HIGH = 2
+    INITIAL = 0  # aka standby, nothing happens here. typically darkness
+    PRIMARY = 1  # aka active room
+    HIGH = 2  # aka enrage / etc
+    EXTRA = 3  # for room entry as high of catacombs because they share light
 
 
 class Event(Enum):
@@ -48,6 +49,12 @@ class Event(Enum):
     ENTER_TREE = Event('Enter tree zone', True, 12)  # party enters the tree zone starts interaction
     TREE_ENRAGE = Event('Panic at the tree', True, 13)
     RETURN_FROM_DREAM = Event('Wake up from dream', True, 14)  # party wakes up in the tent again
+
+
+EVENTS_BY_ID = {
+    e.value.code: e
+    for e in Event
+}
 
 
 class World:
@@ -91,11 +98,14 @@ class World:
                self.wall_a_plugged, self.wall_b_plugged)
         return result
 
-    def handle_event(self, event_name):
-        try:
-            event = Event[event_name]
-        except Exception as e:
-            print('NOT EVENT: %s / %s' % (event_name, e))
+    def handle_event(self, event_name_or_id):
+        print('Before event: %s' % self.get_description())
+        if event_name_or_id in Event:
+            event = Event[event_name_or_id]
+        elif event_name_or_id in EVENTS_BY_ID:
+            event = EVENTS_BY_ID[event_name_or_id]
+        else:
+            print('NOT EVENT: %s ' % (event_name_or_id,))
             return
 
         self.change_time = time.time()
@@ -126,6 +136,7 @@ class World:
             return self.return_from_dream()
         else:
             print('CANT HANDLE -- %s in %s' % (event, self.aactive_room))
+        print('After event: %s' % self.get_description())
 
     def enter_dream(self):
         self.active_room = Room.ENTRY

@@ -4,7 +4,7 @@ from flask_bootstrap import Bootstrap5
 from flask import Flask, request, render_template, url_for, redirect
 
 from sound import soundcheck, PLAYER
-import world as w
+from world import World
 
 app = Flask(__name__)
 Bootstrap5(app)
@@ -42,12 +42,14 @@ class Event(Enum):
 # map of default roles
 # TODO: read/save, maybe?
 DEFAULT_ROLES = {
-    'foo': Role.ROOM_ENTRY,
-    'bar': Role.DEVICE_WALL
+    '24d7eb15b9b0': Role.ROOM_TREE,
+    'a0b76556b22c': Role.ROOM_WALKER,
+    '807d3ab7dae8': Role.ROOM_BEAST,
+    # TODO: more
 }
 
 
-class World:
+class Nodes:
     """
     :node_states: -- map of existing node_id to state
     :node_roles: -- map of node_id to role
@@ -92,7 +94,8 @@ class World:
             raise ValueError('Unknown event')
 
 
-world = World()
+nodes = Nodes()
+WORLD = World()
 
 
 @app.route('/event', methods=['POST'])
@@ -102,7 +105,8 @@ def event():
     if not did or not eid:
         return 'no did or eid', 400
 
-    world.handle_event(Event(int(eid)), did)  # FIXME: check for eids?
+    nodes.handle_event(Event(int(eid)), did)  # FIXME: check for eids?
+    WORLD.handle_event(eid)
 
     return '', 200  # TODO: maybe something useful?
 
@@ -114,7 +118,7 @@ def register():
     if not did:
         return 'no did', 400
 
-    role = world.register(did)
+    role = nodes.register(did)
     return str(role.value)
 
 
@@ -124,7 +128,7 @@ def state():
     did = request.args.get('did')
     if not did:
         return 'no did', 400
-    return str(world.read_state(did).value)
+    return str(nodes.read_state(did).value)
 
 
 @app.route('/ping')
@@ -135,16 +139,21 @@ def ping():
 @app.route('/')
 def index():
     "home page for ui control"
-    return render_template('index.html', world=world, now=time.time())
+    return render_template(
+        'index.html',
+        nodes=nodes,
+        desc=WORLD.get_description(),
+        now=time.time()
+    )
 
 
 @app.route('/btn_action/<action>', methods=['POST'])
 def btn_action(action):
     "resets all to initial"
     if action == "abort":
-        world.handle_event(Event.RESET)
+        nodes.handle_event(Event.RESET)
     elif action == "next":
-        world.handle_event(Event.OP_NEXT)
+        nodes.handle_event(Event.OP_NEXT)
     else:
         return 'BAD', 500
     return redirect(url_for('index'))
