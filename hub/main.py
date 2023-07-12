@@ -4,6 +4,7 @@ from flask_bootstrap import Bootstrap5
 from flask import Flask, request, render_template, url_for, redirect
 
 from sound import soundcheck, PLAYER
+import world as w
 
 app = Flask(__name__)
 Bootstrap5(app)

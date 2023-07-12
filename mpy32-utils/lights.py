@@ -44,11 +44,11 @@ SCENE_COZY = Scene(
 SCENE_PSYCHO = Scene(
     intro=[
         [((x, 0, 2 * x), 150)]
-        for x in range(0, 150, 2)
+        for x in range(0, 20, 2)
     ],
     loop=[
         [((80 + x, 0, 200 - x), 150)]
-        for x in list(range(0, 100, 1)) + list(range(100, 0, -1))
+        for x in list(range(0, 20, 1)) + list(range(20, 0, -1))
     ]
 )  # in room 1 and 2
 SCENE_WALKER = Scene()  # in room 3
@@ -58,7 +58,7 @@ SCENE_TREE = Scene()  # in room 4
 class State:
     def __init__(self):
         self.state = -1
-        self.scene = SCENE_DARKNESS
+        self.scene = SCENE_PSYCHO  # FIXME: just testing
         self.to_scene = None
         self.period = 0.2
         self.max_pixels = 150  # max pixels
@@ -91,8 +91,12 @@ class State:
         print('showing frame %s' % (frame,))
         for (color, length) in frame:
             r, g, b = color
+            # cap the colors just in case
+            cw = min(g, 150), min(r, 150), min(b, 150)
+            print('showing color %s' % (cw,))
+
             for i in range(length):
-                self.np[n] = g, r, b
+                self.np[n] = cw
                 n += 1
         self.np.write()
 
