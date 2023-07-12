@@ -17,15 +17,12 @@
   <h2 class="text-light bg-dark">World has {{ nodes.node_roles | length }} roles </h2>
   <h2 class="text-light bg-dark">Desc: {{desc}}</h2>
   <div class="d-grid gap-2">
-    <form method="POST" role="form" class="form-horizontal" 
-      action="{{ url_for('btn_action', action='next') }}">
-      <input type="submit" class="btn btn-secondary" value="Next"/>
-    </form>
-
-    <form method="POST" role="form" class="form-horizontal"
-      action="{{ url_for('btn_action', action='abort') }}">
-      <input type="submit" class="btn btn-danger" value="Abort"/>
-    </form>
+    {% for event in events %}
+      <form method="POST" role="form" class="form-horizontal"
+        action="{{ url_for('btn_action', action=event.name) }}">
+        <input type="submit" class="btn btn-danger" value="{{event.name}}"/>
+      </form>
+    {% endfor %}
   </div>
   <table class="table table-striped table-dark">
     <thead> <tr>

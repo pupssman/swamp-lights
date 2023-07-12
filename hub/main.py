@@ -45,6 +45,7 @@ DEFAULT_ROLES = {
     '24d7eb15b9b0': Role.ROOM_TREE,
     'a0b76556b22c': Role.ROOM_WALKER,
     '807d3ab7dae8': Role.ROOM_BEAST,
+    '9c9c1fc9b20c': Role.DEVICE_COLUMN,
     # TODO: more
 }
 
@@ -139,23 +140,21 @@ def ping():
 @app.route('/')
 def index():
     "home page for ui control"
+    events = WORLD.get_operator_events()
+
     return render_template(
         'index.html',
         nodes=nodes,
         desc=WORLD.get_description(),
+        events=events,
         now=time.time()
     )
 
 
 @app.route('/btn_action/<action>', methods=['POST'])
 def btn_action(action):
-    "resets all to initial"
-    if action == "abort":
-        nodes.handle_event(Event.RESET)
-    elif action == "next":
-        nodes.handle_event(Event.OP_NEXT)
-    else:
-        return 'BAD', 500
+    WORLD.handle_event(action)
+
     return redirect(url_for('index'))
 
 

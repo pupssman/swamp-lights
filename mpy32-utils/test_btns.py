@@ -172,7 +172,7 @@ BTN_A = ButtonTracker(
 
 # D2 is GPIO 4 on esp8266
 BTN_B = ButtonTracker(
-    pin=4,
+    pin=14,
     on_high=lambda: blink.slow(2),
     on_low=lambda: blink.fast(2))
 
