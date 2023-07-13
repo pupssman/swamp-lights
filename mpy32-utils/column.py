@@ -47,7 +47,6 @@ class State:
                 self.raise_time is not None and \
                 time.time() - self.raise_time > self.time_limit:
             self.exploded = True
-            self.state = 2  # HIGH
             self.player.change_scene(SCENE_ALARM)
             if self.connector:
                 self.connector.report_event(eid=15)
@@ -69,7 +68,7 @@ class State:
             self.player.change_scene(SCENE_BASE)
 
     def change_state(self, to_state):
-        if to_state != self.state:
+        if to_state != self.state or self.exploded and to_state == 0:
             self.state = to_state
 
             if to_state == 0:  # initial
