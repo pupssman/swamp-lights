@@ -28,3 +28,8 @@ burn_lights:
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/lights.py main.py
 	ampy -p /dev/ttyUSB0 reset
+
+burn_column:
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/column.py main.py
+	ampy -p /dev/ttyUSB0 reset
