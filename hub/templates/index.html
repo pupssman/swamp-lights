@@ -14,13 +14,11 @@
 
 {% block content %}
   <div class="bg-dark bg-gradient">
-  <h2 class="text-light bg-dark">World has {{ nodes.node_roles | length }} roles </h2>
-  <h2 class="text-light bg-dark">Desc: {{desc}}</h2>
   <div class="d-grid gap-2">
     {% for event in events %}
       <form method="POST" role="form" class="form-horizontal"
         action="{{ url_for('btn_action', action=event.name) }}">
-        <input type="submit" class="btn btn-danger" value="{{event.name}}"/>
+        <input type="submit" class="btn btn-danger btn-large" value="{{event.name}}"/>
       </form>
     {% endfor %}
   </div>
