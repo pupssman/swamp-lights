@@ -13,6 +13,7 @@ import urequests
 import ubinascii
 import _thread
 import network
+import neopixel as nx
 
 
 # unique id is 4 bytes, get nicer repr
@@ -158,10 +159,13 @@ class ButtonTracker:
 
         self.last = value
 
-        if self.last:
-            self.on_high()
-        else:
-            self.on_low()
+        try:
+            if self.last:
+                self.on_high()
+            else:
+                self.on_low()
+        except Exception as e:
+            print('oops: %s' % e)
 
     def on_high(self):
         # TODO: imlement
@@ -221,6 +225,76 @@ class Blinker:
 
     def slow(self, times=1):
         self._blink(0.5, times)
+
+
+class Scene:
+    """
+    intro, outro and loop are sequences of frames
+    frame is sequence of tuples (color, length) where color is rgb
+    """
+    def __init__(self, intro=[], loop=[], outro=[]):
+        self.intro = intro
+        self.outro = outro
+        self.loop = loop
+
+
+if DID == DID_ENTRY:
+    # FIXME: oh hell
+    strip_pin = 2
+else:
+    # strip control gpio
+    strip_pin = 4
+
+
+class ScenePlayer:
+    def __init__(self, initial_scene, on_frame=None):
+        self.state = -1
+        self.scene = initial_scene
+        self.to_scene = None
+        self.period = 0.1
+        self.max_pixels = 150  # max pixels
+        self.np = nx.NeoPixel(machine.Pin(strip_pin), self.max_pixels)
+        self.on_frame = on_frame
+
+    def change_scene(self, to_scene):
+        self.to_scene = to_scene
+
+    def play_one(self, sequence):
+        for frame in sequence:
+            time.sleep(self.period)
+            self.show_frame(frame)
+            if self.to_scene:
+                return  # return after one frame when need to switch
+        else:
+            time.sleep(self.period)
+
+    def show_frame(self, frame):
+        # frame is sequence of (color, length)
+        n = 0
+        print('showing frame %s' % (frame,))
+        for (color, length) in frame:
+            r, g, b = color
+            # cap the colors just in case
+            cw = min(g, 150), min(r, 150), min(b, 150)
+            print('showing color %s' % (cw,))
+
+            for i in range(length):
+                self.np[n] = cw
+                n += 1
+        self.np.write()
+
+        if self.on_frame:
+            self.on_frame()
+
+    def play(self):
+        if self.to_scene:
+            print('switching scene')
+            self.play_one(self.scene.outro)
+            self.play_one(self.to_scene.intro)
+            self.scene = self.to_scene
+            self.to_scene = None
+        else:
+            self.play_one(self.scene.loop)
 
 # STATE = State()
 

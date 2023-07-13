@@ -42,6 +42,7 @@ class Event(Enum):
 
     COLUMN_RISE = EventC('column has risen', False, 6)
     COLUMN_LOW = EventC('column was lowered', False, 7)
+    COLUMN_EXPLODE = EventC('column has exploded', True, 15)
 
     START_WALKER = EventC('activate walker', True, 8)  # start of the walker interaction
     WALKER_ENRAGE = EventC('walker enrages', True, 9)
