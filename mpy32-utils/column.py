@@ -2,7 +2,7 @@ import time
 
 from common import Connector, Blinker, ButtonTracker, Scene, ScenePlayer
 
-L = 100
+L = 150
 SCENE_DARKNESS = Scene(loop=[[((0, 0, 0), L)]])  # just black
 
 
@@ -27,9 +27,9 @@ def make_loop_scene(base_color, pulse_depth, pulse_period, intro_size, outro_siz
     )  # in room 1 and 2
 
 
-SCENE_BASE = make_loop_scene((25, 100, 50), 0.7, 50, 10, 10)
+SCENE_BASE = make_loop_scene((25, 100, 50), 0.7, 50, 50, 10)
 SCENE_DANGER = make_loop_scene((100, 0, 20), 0.5, 10, 5, 5)
-SCENE_ALARM = make_loop_scene((150, 30, 0), 0.5, 50, 30, 10)
+SCENE_ALARM = make_loop_scene((200, 10, 0), 0.3, 5, 20, 10)
 
 
 class State:
@@ -68,7 +68,7 @@ class State:
             self.player.change_scene(SCENE_BASE)
 
     def change_state(self, to_state):
-        if to_state != self.state or self.exploded and to_state == 0:
+        if to_state != self.state:
             self.state = to_state
 
             if to_state == 0:  # initial
@@ -78,9 +78,7 @@ class State:
             elif to_state == 1:  # primary
                 self.player.change_scene(SCENE_BASE)
             elif to_state == 2:  # scene high
-                self.player.change_scene(SCENE_DANGER)
-            else:
-                self.player.change_scene(SCENE_ALARM)
+                self.player.change_scene(SCENE_ALARM)  # forced fire
 
     def play(self):
         return self.player.play()

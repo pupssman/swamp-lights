@@ -271,12 +271,10 @@ class ScenePlayer:
     def show_frame(self, frame):
         # frame is sequence of (color, length)
         n = 0
-        print('showing frame %s' % (frame,))
         for (color, length) in frame:
             r, g, b = color
             # cap the colors just in case
             cw = min(g, 150), min(r, 150), min(b, 150)
-            print('showing color %s' % (cw,))
 
             for i in range(length):
                 self.np[n] = cw
