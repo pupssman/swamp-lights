@@ -33,3 +33,8 @@ burn_column:
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
 	ampy -p /dev/ttyUSB0 put ../mpy32-utils/column.py main.py
 	ampy -p /dev/ttyUSB0 reset
+
+burn_walker:
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/common.py common.py
+	ampy -p /dev/ttyUSB0 put ../mpy32-utils/walker.py main.py
+	ampy -p /dev/ttyUSB0 reset
