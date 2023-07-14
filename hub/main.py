@@ -57,7 +57,8 @@ DEFAULT_ROLES = {
     'a0b76556b22c': Role.ROOM_WALKER,
     '807d3ab7dae8': Role.ROOM_ENTRY,
     '9c9c1fc9b20c': Role.DEVICE_COLUMN,
-    # TODO: more
+    '9c9c1fcadc44': Role.ROOM_BEAST,
+    '240ac4ef4434': Role.ROOM_LAB
 }
 
 

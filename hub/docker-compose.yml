@@ -15,5 +15,5 @@ services:
     ports:
       - "5000:5000"
     stop_signal: SIGINT
-    #test:
-    #build: ./test
+  #test:
+  #  build: ./test

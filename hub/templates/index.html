@@ -36,7 +36,7 @@
         <th scope="col">{{ loop.index }}</th>
         <td>{{ did }}</td>
         <td>{{ nodes.node_roles[did] }}</td>
-        <td>{{ nodes.node_states[did] }}</td>
+        <td>{{ nodes.read_state(did) }}</td>
         <td>{{ '%0.2f' | format(now - nodes.node_seen[did]) }}</td>
       </tr>
   {% endfor %}

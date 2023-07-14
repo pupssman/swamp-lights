@@ -181,7 +181,7 @@ class World:
             r: RoomState.INITIAL for r in Room
         }
 
-        self.room_state[Room.ENTRY] = RoomState.HIGH # light is in primary room
+        self.room_state[Room.ENTRY] = RoomState.PRIMARY  # light is in primary room
         PLAYER.set_room_track(1, 0)  # cosy sounds
 
     def handle_device_event(self, event):
