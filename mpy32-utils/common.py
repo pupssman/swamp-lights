@@ -259,11 +259,11 @@ class ScenePlayer:
     def change_scene(self, to_scene):
         self.to_scene = to_scene
 
-    def play_one(self, sequence):
+    def play_one(self, sequence, escapable=True):
         for frame in sequence:
             time.sleep(self.period)
             self.show_frame(frame)
-            if self.to_scene:
+            if self.to_scene and escapable:
                 return  # return after one frame when need to switch
         else:
             time.sleep(self.period)
@@ -271,6 +271,7 @@ class ScenePlayer:
     def show_frame(self, frame):
         # frame is sequence of (color, length)
         n = 0
+        print('showing frame %s' % (frame,))
         for (color, length) in frame:
             r, g, b = color
             # cap the colors just in case
@@ -287,8 +288,8 @@ class ScenePlayer:
     def play(self):
         if self.to_scene:
             print('switching scene')
-            self.play_one(self.scene.outro)
-            self.play_one(self.to_scene.intro)
+            self.play_one(self.scene.outro, escapable=False)
+            self.play_one(self.to_scene.intro, escapable=False)
             self.scene = self.to_scene
             self.to_scene = None
         else:

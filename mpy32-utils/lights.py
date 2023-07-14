@@ -35,8 +35,8 @@ SCENE_COZY = Scene(
             base_color=COLOR_DARKNESS,
             target_color=COLOR_COZY,
             frame=x,
-            total_frames=100), ENTRY_START), D]
-        for x in range(0, 100)
+            total_frames=10), ENTRY_START), D]
+        for x in range(0, 10)
     ], loop=[
         [(colorscale(COLOR_COZY, frame=x, total_frames=30), ENTRY_START), D]
         for x in list(range(30)) + list(range(30, 0, -1))
@@ -45,13 +45,13 @@ SCENE_COZY = Scene(
             target_color=COLOR_DARKNESS,
             base_color=COLOR_COZY,
             frame=x,
-            total_frames=100), ENTRY_START), D]
-        for x in range(100, 0, -1)
-    ],
+            total_frames=30), ENTRY_START), D]
+        for x in range(30, 0, -1)
+    ] + [[(COLOR_DARKNESS, L)] for _ in range(50)],
 )  # in room 1 and 2
 
-COLOR_PA = (200, 0, 150)  # pinkish
-COLOR_PB = (0, 150, 200)  # greenish
+COLOR_PA = (200, 0, 120)  # pinkish
+COLOR_PB = (0, 100, 200)  # greenish
 
 SCENE_PSYCHO = Scene(
     intro=[
@@ -59,8 +59,8 @@ SCENE_PSYCHO = Scene(
             base_color=COLOR_DARKNESS,
             target_color=COLOR_PA,
             frame=x,
-            total_frames=100), L)]
-        for x in range(0, 100)
+            total_frames=30), L)]
+        for x in range(0, 30)
     ], loop=[
         [(colorscale(
             base_color=COLOR_PA,
@@ -73,8 +73,8 @@ SCENE_PSYCHO = Scene(
             target_color=COLOR_PA,
             base_color=COLOR_COZY,
             frame=x,
-            total_frames=100), L)]
-        for x in range(100, 0, -1)
+            total_frames=10), L)]
+        for x in range(10, 0, -1)
     ],
 )  # in room 1 and 2
 
